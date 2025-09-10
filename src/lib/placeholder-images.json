@@ -1,3 +1,19 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    { "id": "hero-main", "description": "Hero banner image", "imageUrl": "https://picsum.photos/seed/hero/1600/600", "imageHint": "tech gadgets" },
+    { "id": "cat-electronics", "description": "Electronics category", "imageUrl": "https://picsum.photos/seed/cat1/400/300", "imageHint": "electronics" },
+    { "id": "cat-fashion", "description": "Fashion category", "imageUrl": "https://picsum.photos/seed/cat2/400/300", "imageHint": "clothing" },
+    { "id": "cat-home", "description": "Home goods category", "imageUrl": "https://picsum.photos/seed/cat3/400/300", "imageHint": "living room" },
+    { "id": "cat-books", "description": "Books category", "imageUrl": "https://picsum.photos/seed/cat4/400/300", "imageHint": "library" },
+    { "id": "cat-beauty", "description": "Beauty category", "imageUrl": "https://picsum.photos/seed/cat5/400/300", "imageHint": "cosmetics" },
+    { "id": "cat-sports", "description": "Sports category", "imageUrl": "https://picsum.photos/seed/cat6/400/300", "imageHint": "sports equipment" },
+    { "id": "prod-smartwatch", "description": "Smartwatch product", "imageUrl": "https://picsum.photos/seed/prod1/600/600", "imageHint": "smartwatch" },
+    { "id": "prod-headphones", "description": "Headphones product", "imageUrl": "https://picsum.photos/seed/prod2/600/600", "imageHint": "headphones" },
+    { "id": "prod-laptop", "description": "Laptop product", "imageUrl": "https://picsum.photos/seed/prod3/600/600", "imageHint": "laptop" },
+    { "id": "prod-tshirt", "description": "T-shirt product", "imageUrl": "https://picsum.photos/seed/prod4/600/600", "imageHint": "t-shirt" },
+    { "id": "prod-jeans", "description": "Jeans product", "imageUrl": "https://picsum.photos/seed/prod5/600/600", "imageHint": "jeans" },
+    { "id": "prod-sofa", "description": "Sofa product", "imageUrl": "https://picsum.photos/seed/prod6/600/600", "imageHint": "sofa" },
+    { "id": "prod-lamp", "description": "Lamp product", "imageUrl": "https://picsum.photos/seed/prod7/600/600", "imageHint": "desk lamp" },
+    { "id": "prod-novel", "description": "Novel product", "imageUrl": "https://picsum.photos/seed/prod8/600/600", "imageHint": "book cover" }
+  ]
 }
