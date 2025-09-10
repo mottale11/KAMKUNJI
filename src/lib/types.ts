@@ -18,3 +18,24 @@ export interface Category {
   imageUrl: string;
   imageHint: string;
 }
+
+export interface Order {
+  id: string;
+  customer: {
+    name: string;
+    email: string;
+  };
+  date: string;
+  status: 'Pending' | 'Shipped' | 'Delivered' | 'Canceled';
+  total: number;
+  items: {
+    productId: string;
+    quantity: number;
+  }[];
+  deliveryInfo: {
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+}

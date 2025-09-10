@@ -18,7 +18,8 @@ import {
     LineChart,
     Settings,
     Store,
-    ChevronDown
+    ChevronDown,
+    ShoppingCart
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +28,11 @@ const menuItems = [
         href: '/admin',
         label: 'Dashboard',
         icon: LayoutGrid,
+    },
+    {
+        href: '/admin/orders',
+        label: 'Orders',
+        icon: ShoppingCart,
     },
     {
         href: '/admin/products',
