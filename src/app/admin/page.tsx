@@ -19,6 +19,7 @@ import { RecentSales } from "@/components/admin/recent-sales";
 import { NewOrders } from "@/components/admin/new-orders";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
   export default function DashboardPage() {
     return (
@@ -166,4 +167,3 @@ import { toast } from "@/hooks/use-toast";
         </Tabs>
     )
   }
-
