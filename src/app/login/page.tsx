@@ -5,7 +5,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Store } from 'lucide-react';
+
+const KamkunjiLogo = () => (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-8 w-8"
+    >
+      <circle cx="16" cy="16" r="16" fill="#1E90FF" />
+      <path
+        d="M10 10V22H13.2571L22 10.4375V10H10Z"
+        fill="white"
+      />
+      <path
+        d="M13.2571 22L22 13.75V22H13.2571Z"
+        fill="white"
+      />
+    </svg>
+);
+
 
 export default function LoginPage() {
   return (
@@ -15,7 +36,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-sm">
             <CardHeader className="text-center">
                  <Link href="/" className="flex items-center justify-center gap-2 font-bold text-xl mb-2">
-                    <Store className="h-7 w-7 text-primary" />
+                    <KamkunjiLogo />
                     <span className="font-headline">Kamkunji</span>
                 </Link>
                 <CardTitle className="text-2xl">Welcome Back</CardTitle>

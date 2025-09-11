@@ -1,5 +1,6 @@
 
-import { Menu, Search, ShoppingCart, Store, User } from 'lucide-react';
+
+import { Menu, Search, ShoppingCart, User } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,28 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CircleUserRound, LogOut, Package } from 'lucide-react';
+
+const KamkunjiLogo = () => (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-8 w-8"
+    >
+      <circle cx="16" cy="16" r="16" fill="#1E90FF" />
+      <path
+        d="M10 10V22H13.2571L22 10.4375V10H10Z"
+        fill="white"
+      />
+      <path
+        d="M13.2571 22L22 13.75V22H13.2571Z"
+        fill="white"
+      />
+    </svg>
+);
+
 
 const navLinks = [
   { href: '/categories', label: 'Categories' },
@@ -20,7 +43,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-            <Store className="h-6 w-6 text-primary" />
+            <KamkunjiLogo />
             <span className="font-headline">Kamkunji</span>
           </Link>
         </div>
@@ -35,7 +58,7 @@ export function Header() {
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">
             <nav className="flex flex-col gap-4">
               <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-                <Store className="h-6 w-6 text-primary" />
+                <KamkunjiLogo />
                 <span className="font-headline">Kamkunji</span>
               </Link>
               {navLinks.map((link) => (
