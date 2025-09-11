@@ -63,7 +63,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="container grid md:grid-cols-2 gap-12 items-start">
-          <div className="relative aspect-[4/3]">
+          <div className="relative aspect-square md:aspect-[4/3]">
              <Image
               src={product.imageUrl}
               alt={product.title}
@@ -134,7 +134,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <section className="py-16 lg:py-24">
             <div className="container">
                  <h2 className="text-2xl font-bold mb-8">You Might Also Like</h2>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     {relatedProducts.map((p) => (
                         <ProductCard key={p.id} product={p} />
                     ))}

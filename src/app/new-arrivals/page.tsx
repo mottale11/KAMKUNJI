@@ -29,7 +29,7 @@ export default function NewArrivalsPage() {
 
         <div className="container pb-16 lg:pb-24">
           <h1 className="text-3xl font-bold font-headline mb-8">New Arrivals</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {newArrivals.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
