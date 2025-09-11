@@ -1,11 +1,36 @@
-import { mockProducts } from "@/lib/mock-data";
+
+'use client'
+import { useState, useEffect } from 'react';
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { collection, getDocs, query, where, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Product } from '@/lib/types';
+import { Skeleton } from '../ui/skeleton';
 
 export function NewArrivals() {
-    const newArrivals = mockProducts.slice(0, 8);
+    const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
+     useEffect(() => {
+        const fetchNewArrivals = async () => {
+            try {
+                const q = query(collection(db, "products"), where("isNewArrival", "==", true), limit(8));
+                const querySnapshot = await getDocs(q);
+                const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+                setNewArrivals(productsData);
+            } catch (error) {
+                console.error("Error fetching new arrivals:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNewArrivals();
+    }, []);
+
 
     return (
         <section className="py-16 lg:py-24 bg-card">
@@ -18,9 +43,21 @@ export function NewArrivals() {
                     </Link>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                    {newArrivals.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
+                    {loading ? (
+                        Array.from({ length: 8 }).map((_, index) => (
+                            <div key={index} className="space-y-2">
+                                <Skeleton className="h-[250px] w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </div>
+                        ))
+                    ) : newArrivals.length > 0 ? (
+                        newArrivals.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))
+                    ) : (
+                        <p>No new arrivals found.</p>
+                    )}
                 </div>
             </div>
         </section>

@@ -1,9 +1,12 @@
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 
-import { mockProducts, mockCategories } from '@/lib/mock-data';
+import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { mockCategories } from '@/lib/mock-data';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
@@ -13,6 +16,8 @@ import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Minus, Plus, ShoppingCart, CheckCircle } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
+import type { Product } from '@/lib/types';
+
 
 // A helper component for the WhatsApp button to avoid hydration issues with use-client
 const WhatsAppButton = ({ productUrl, productName }: { productUrl: string, productName: string }) => {
@@ -35,27 +40,46 @@ const WhatsAppButton = ({ productUrl, productName }: { productUrl: string, produ
 };
 
 
-export async function generateStaticParams() {
-  return mockProducts.map((product) => ({
-    id: product.id,
-  }));
+async function getProduct(id: string) {
+    const docRef = doc(db, "products", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Product;
+    }
+    return null;
 }
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+async function getRelatedProducts(category: string, currentProductId: string) {
+    const q = query(
+        collection(db, "products"),
+        where("category", "==", category),
+        limit(5) 
+    );
+    const querySnapshot = await getDocs(q);
+    const products = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+        .filter(p => p.id !== currentProductId);
+    
+    return products.slice(0, 4);
+}
+
+
+export default async function ProductPage({ params }: { params: { id: string } }) {
   const headersList = headers();
   const host = headersList.get('host') || '';
   const protocol = headersList.get('x-forwarded-proto') || 'http';
   const productUrl = `${protocol}://${host}/product/${params.id}`;
 
-  const product = mockProducts.find((p) => p.id === params.id);
-
+  const product = await getProduct(params.id);
+  
   if (!product) {
     notFound();
   }
+  
+  const relatedProducts = await getRelatedProducts(product.category, product.id);
 
   const category = mockCategories.find((c) => c.name === product.category);
-  const relatedProducts = mockProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
-
+  
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercentage = hasDiscount ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) : 0;
 
@@ -176,4 +200,9 @@ export default function ProductPage({ params }: { params: { id: string } }) {
       <Footer />
     </div>
   );
+}
+
+//This is to ensure that Next.js doesn't try to generate static pages for every product at build time.
+export async function generateStaticParams() {
+  return [];
 }

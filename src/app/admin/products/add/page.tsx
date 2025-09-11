@@ -14,21 +14,56 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useCallback } from "react";
 import Image from "next/image";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+
+const productSchema = z.object({
+    name: z.string().min(1, "Product name is required"),
+    description: z.string().min(1, "Description is required"),
+    price: z.preprocess(
+      (a) => parseFloat(z.string().parse(a)),
+      z.number().positive("Price must be a positive number")
+    ),
+    originalPrice: z.preprocess(
+        (a) => (a === '' ? undefined : parseFloat(z.string().parse(a))),
+        z.number().positive("Original price must be a positive number").optional()
+    ),
+    stock: z.preprocess(
+      (a) => parseInt(z.string().parse(a), 10),
+      z.number().int().min(0, "Stock can't be negative")
+    ),
+    category: z.string().min(1, "Category is required"),
+    isNewArrival: z.boolean().default(false),
+    isFlashDeal: z.boolean().default(false),
+    image: z.instanceof(File).refine(file => file.size > 0, "Product image is required"),
+});
+
+type ProductFormValues = z.infer<typeof productSchema>;
 
 export default function AddProductPage() {
     const { toast } = useToast();
+    const router = useRouter();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        toast({
-            title: "Product Added!",
-            description: "The new product has been successfully added to your store.",
-        });
-    };
+    const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<ProductFormValues>({
+        resolver: zodResolver(productSchema),
+        defaultValues: {
+            isNewArrival: false,
+            isFlashDeal: false
+        }
+    });
+
+    const imageFile = watch('image');
 
     const handleImageChange = (file: File | null) => {
         if (file) {
+            setValue("image", file, { shouldValidate: true });
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
@@ -38,25 +73,65 @@ export default function AddProductPage() {
             setImagePreview(null);
         }
     };
-    
-    const onDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+
+     const onDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
         const file = event.dataTransfer.files[0];
-        if(file && file.type.startsWith('image/')) {
+        if (file && file.type.startsWith('image/')) {
             handleImageChange(file);
         }
-    }, []);
+    }, [setValue]);
 
     const onDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
     };
 
-    const onFileClick = (event: React.MouseEvent<HTMLDivElement>) => {
-        const input = document.getElementById('image-upload') as HTMLInputElement;
-        input.click();
-    }
+    const onFileClick = () => {
+        document.getElementById('image-upload')?.click();
+    };
+
+    const onSubmit = async (data: ProductFormValues) => {
+        setIsSubmitting(true);
+        try {
+            // 1. Upload image to Firebase Storage
+            const imageRef = ref(storage, `products/${Date.now()}_${data.image.name}`);
+            await uploadBytes(imageRef, data.image);
+            const imageUrl = await getDownloadURL(imageRef);
+
+            // 2. Add product data to Firestore
+            await addDoc(collection(db, "products"), {
+                title: data.name,
+                description: data.description,
+                price: data.price,
+                originalPrice: data.originalPrice || null,
+                category: data.category,
+                stock: data.stock,
+                imageUrl: imageUrl,
+                isNewArrival: data.isNewArrival,
+                isFlashDeal: data.isFlashDeal,
+                rating: Math.floor(Math.random() * 2) + 3.5, // Mock rating
+                reviewCount: Math.floor(Math.random() * 100), // Mock review count,
+                imageHint: 'product image',
+            });
+
+            toast({
+                title: "Product Added!",
+                description: "The new product has been successfully added to your store.",
+            });
+            router.push('/admin/products');
+        } catch (error) {
+            console.error("Error adding product:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to add product. Please try again.",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
 
     return (
@@ -70,7 +145,7 @@ export default function AddProductPage() {
                 </Link>
                 <h1 className="text-2xl font-bold">Add New Product</h1>
             </div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid md:grid-cols-3 gap-6">
                     <div className="md:col-span-2">
                         <Card>
@@ -81,11 +156,13 @@ export default function AddProductPage() {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Product Name</Label>
-                                    <Input id="name" placeholder="e.g. Wireless Headphones" />
+                                    <Input id="name" placeholder="e.g. Wireless Headphones" {...register("name")} />
+                                    {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="description">Description</Label>
-                                    <Textarea id="description" placeholder="Provide a detailed description of the product." />
+                                    <Textarea id="description" placeholder="Provide a detailed description of the product." {...register("description")} />
+                                    {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -96,14 +173,14 @@ export default function AddProductPage() {
                                 <CardTitle>Product Image</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <Input 
-                                    type="file" 
+                                <input
+                                    type="file"
                                     id="image-upload"
-                                    className="hidden" 
+                                    className="hidden"
                                     accept="image/*"
                                     onChange={(e) => handleImageChange(e.target.files ? e.target.files[0] : null)}
                                 />
-                                <div 
+                                <div
                                     className="w-full aspect-square border-2 border-dashed rounded-md flex flex-col items-center justify-center text-muted-foreground cursor-pointer"
                                     onDrop={onDrop}
                                     onDragOver={onDragOver}
@@ -120,6 +197,7 @@ export default function AddProductPage() {
                                         </>
                                     )}
                                 </div>
+                                {errors.image && <p className="text-sm text-destructive mt-2">{errors.image.message}</p>}
                             </CardContent>
                         </Card>
                         <Card>
@@ -127,17 +205,20 @@ export default function AddProductPage() {
                                 <CardTitle>Pricing & Inventory</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="original-price">Original Price (Ksh)</Label>
-                                    <Input id="original-price" type="number" placeholder="e.g. 5500.00" />
+                                 <div className="space-y-2">
+                                    <Label htmlFor="originalPrice">Original Price (Ksh)</Label>
+                                    <Input id="originalPrice" type="number" placeholder="e.g. 5500.00" {...register("originalPrice")} />
+                                    {errors.originalPrice && <p className="text-sm text-destructive">{errors.originalPrice.message}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="price">Sale Price (Ksh)</Label>
-                                    <Input id="price" type="number" placeholder="e.g. 4500.00" />
+                                    <Input id="price" type="number" placeholder="e.g. 4500.00" {...register("price")} />
+                                     {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="stock">Stock Quantity</Label>
-                                    <Input id="stock" type="number" placeholder="0" />
+                                    <Input id="stock" type="number" placeholder="0" {...register("stock")} />
+                                    {errors.stock && <p className="text-sm text-destructive">{errors.stock.message}</p>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -150,23 +231,42 @@ export default function AddProductPage() {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="category">Category</Label>
-                                     <Select>
-                                        <SelectTrigger id="category">
-                                            <SelectValue placeholder="Select a category" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {mockCategories.map(cat => (
-                                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Controller
+                                        name="category"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger id="category">
+                                                    <SelectValue placeholder="Select a category" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {mockCategories.map(cat => (
+                                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
+                                    {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="is-new-arrival" />
+                                    <Controller
+                                        name="isNewArrival"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Checkbox id="is-new-arrival" checked={field.value} onCheckedChange={field.onChange} />
+                                        )}
+                                    />
                                     <Label htmlFor="is-new-arrival">Mark as New Arrival</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="is-flash-deal" />
+                                    <Controller
+                                        name="isFlashDeal"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Checkbox id="is-flash-deal" checked={field.value} onCheckedChange={field.onChange} />
+                                        )}
+                                    />
                                     <Label htmlFor="is-flash-deal">Include in Flash Deals</Label>
                                 </div>
                             </CardContent>
@@ -174,10 +274,10 @@ export default function AddProductPage() {
                     </div>
                 </div>
                  <div className="mt-6 flex justify-end gap-2">
-                    <Link href="/admin/products">
-                        <Button variant="outline">Cancel</Button>
-                    </Link>
-                    <Button type="submit">Save Product</Button>
+                    <Button variant="outline" asChild>
+                        <Link href="/admin/products">Cancel</Link>
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Product'}</Button>
                 </div>
             </form>
         </>

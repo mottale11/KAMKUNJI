@@ -10,6 +10,8 @@ export interface Product {
   rating: number;
   reviewCount: number;
   stock?: number;
+  isNewArrival?: boolean;
+  isFlashDeal?: boolean;
 }
 
 export interface Category {
@@ -20,7 +22,7 @@ export interface Category {
 }
 
 export interface Order {
-  id: string;
+  id:string;
   customer: {
     name: string;
     email: string;

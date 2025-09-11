@@ -1,9 +1,36 @@
+
+'use client';
+import { useState, useEffect } from 'react';
 import { Zap } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/product-card";
-import { mockFlashDeals } from "@/lib/mock-data";
+import { collection, getDocs, query, where, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import type { Product } from '@/lib/types';
+import { Skeleton } from '../ui/skeleton';
+
 
 export function FlashDeals() {
+    const [flashDeals, setFlashDeals] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
+     useEffect(() => {
+        const fetchFlashDeals = async () => {
+            try {
+                const q = query(collection(db, "products"), where("isFlashDeal", "==", true), limit(8));
+                const querySnapshot = await getDocs(q);
+                const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+                setFlashDeals(productsData);
+            } catch (error) {
+                console.error("Error fetching flash deals:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFlashDeals();
+    }, []);
+
     return (
         <section className="py-16 lg:py-24">
             <div className="container">
@@ -16,7 +43,7 @@ export function FlashDeals() {
                     </div>
                 </div>
 
-                <Carousel 
+                <Carousel
                     opts={{
                         align: "start",
                         loop: true,
@@ -24,11 +51,25 @@ export function FlashDeals() {
                     className="w-full"
                 >
                     <CarouselContent>
-                        {mockFlashDeals.map((product) => (
-                            <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/4">
-                                <ProductCard product={product} />
-                            </CarouselItem>
-                        ))}
+                        {loading ? (
+                             Array.from({ length: 4 }).map((_, index) => (
+                                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
+                                     <div className="space-y-2">
+                                        <Skeleton className="h-[250px] w-full" />
+                                        <Skeleton className="h-4 w-2/3" />
+                                        <Skeleton className="h-4 w-1/2" />
+                                    </div>
+                                </CarouselItem>
+                            ))
+                        ) : flashDeals.length > 0 ? (
+                            flashDeals.map((product) => (
+                                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/4">
+                                    <ProductCard product={product} />
+                                </CarouselItem>
+                            ))
+                         ) : (
+                            <p>No flash deals available right now.</p>
+                         )}
                     </CarouselContent>
                     <CarouselPrevious className="hidden lg:flex" />
                     <CarouselNext className="hidden lg:flex" />
