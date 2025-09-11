@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
@@ -9,8 +11,15 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { mockProducts } from '@/lib/mock-data';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/context/auth-context';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+
   const cartItems = [
     { product: mockProducts[0], quantity: 1 },
     { product: mockProducts[2], quantity: 1 },
@@ -20,6 +29,20 @@ export default function CartPage() {
   const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const shipping = subtotal > 8000 ? 0 : 220; // Example shipping for Nairobi county
   const total = subtotal + shipping;
+  
+  const handleCheckoutClick = () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to proceed to checkout.",
+        variant: "destructive",
+      });
+      router.push('/login');
+    } else {
+      router.push('/checkout');
+    }
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -88,10 +111,8 @@ export default function CartPage() {
                                         <span>Ksh {total.toFixed(2)}</span>
                                     </div>
                                 </div>
-                                <Button asChild size="lg" className="w-full bg-primary hover:bg-primary/90">
-                                  <Link href="/checkout">
+                                <Button onClick={handleCheckoutClick} size="lg" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
                                     Proceed to Checkout <ArrowRight className="ml-2 h-4 w-4" />
-                                  </Link>
                                 </Button>
                             </CardContent>
                         </Card>
