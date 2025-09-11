@@ -11,8 +11,10 @@ import { MoreHorizontal, File, Truck } from "lucide-react";
 import { OrderDetailsDialog } from "@/components/admin/order-details-dialog";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function OrdersPage() {
+    const { toast } = useToast();
     const [orders, setOrders] = useState<Order[]>(mockOrders);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -22,14 +24,44 @@ export default function OrdersPage() {
                 order.id === orderId ? { ...order, status: 'Shipped' } : order
             )
         );
+        toast({
+            title: "Order Updated",
+            description: `Order #${orderId} has been marked as shipped.`,
+        });
         // Here you would also trigger an API call to update the backend and send an email.
+    };
+    
+    const exportOrdersToCSV = () => {
+        const headers = ["Order ID", "Customer Name", "Customer Email", "Date", "Status", "Total"];
+        const rows = orders.map(order => [
+            order.id,
+            order.customer.name,
+            order.customer.email,
+            order.date,
+            order.status,
+            order.total.toFixed(2)
+        ]);
+
+        let csvContent = "data:text/csv;charset=utf-8," 
+            + headers.join(",") + "\n" 
+            + rows.map(e => e.join(",")).join("\n");
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "orders.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast({ title: "Orders Exported", description: "The order list has been exported to CSV." });
     };
 
     return (
         <>
             <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold">Orders</h1>
-                <Button>
+                <Button onClick={exportOrdersToCSV}>
                     <File className="mr-2 h-4 w-4" />
                     Export
                 </Button>

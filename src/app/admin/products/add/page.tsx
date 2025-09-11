@@ -12,9 +12,12 @@ import { mockCategories } from "@/lib/mock-data";
 import { ArrowLeft, Upload } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useCallback } from "react";
+import Image from "next/image";
 
 export default function AddProductPage() {
     const { toast } = useToast();
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,6 +26,38 @@ export default function AddProductPage() {
             description: "The new product has been successfully added to your store.",
         });
     };
+
+    const handleImageChange = (file: File | null) => {
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null);
+        }
+    };
+    
+    const onDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const file = event.dataTransfer.files[0];
+        if(file && file.type.startsWith('image/')) {
+            handleImageChange(file);
+        }
+    }, []);
+
+    const onDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    const onFileClick = (event: React.MouseEvent<HTMLDivElement>) => {
+        const input = document.getElementById('image-upload') as HTMLInputElement;
+        input.click();
+    }
+
 
     return (
         <>
@@ -61,9 +96,29 @@ export default function AddProductPage() {
                                 <CardTitle>Product Image</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="w-full aspect-square border-2 border-dashed rounded-md flex flex-col items-center justify-center text-muted-foreground">
-                                    <Upload className="h-8 w-8" />
-                                    <span>Click or drag to upload</span>
+                                <Input 
+                                    type="file" 
+                                    id="image-upload"
+                                    className="hidden" 
+                                    accept="image/*"
+                                    onChange={(e) => handleImageChange(e.target.files ? e.target.files[0] : null)}
+                                />
+                                <div 
+                                    className="w-full aspect-square border-2 border-dashed rounded-md flex flex-col items-center justify-center text-muted-foreground cursor-pointer"
+                                    onDrop={onDrop}
+                                    onDragOver={onDragOver}
+                                    onClick={onFileClick}
+                                >
+                                    {imagePreview ? (
+                                        <div className="relative w-full h-full">
+                                            <Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-md" />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Upload className="h-8 w-8" />
+                                            <span>Click or drag to upload</span>
+                                        </>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>

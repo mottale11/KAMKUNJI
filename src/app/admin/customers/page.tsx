@@ -1,4 +1,5 @@
 
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,6 +7,7 @@ import { mockOrders } from "@/lib/mock-data";
 import { MoreHorizontal, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 const customers = mockOrders.map(order => order.customer);
 const uniqueCustomers = Array.from(new Set(customers.map(c => c.email)))
@@ -18,9 +20,11 @@ export default function CustomersPage() {
         <>
             <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold">Customers</h1>
-                <Button>
+                <Button asChild>
+                  <Link href="/admin/customers/add">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Add Customer
+                  </Link>
                 </Button>
             </div>
             <Card>
@@ -83,4 +87,3 @@ export default function CustomersPage() {
         </>
     );
 }
-

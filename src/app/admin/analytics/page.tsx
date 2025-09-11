@@ -12,9 +12,10 @@ import {
     TabsList,
     TabsTrigger,
   } from "@/components/ui/tabs"
-import { Users, CreditCard, Activity, DollarSign } from "lucide-react";
+import { Users, CreditCard, Activity, DollarSign, TrafficCone, LineChart } from "lucide-react";
 import { Overview } from "@/components/admin/overview";
 import { RecentSales } from "@/components/admin/recent-sales";
+import { Button } from "@/components/ui/button";
 
   export default function AnalyticsPage() {
     return (
@@ -102,6 +103,38 @@ import { RecentSales } from "@/components/admin/recent-sales";
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+           <TabsContent value="sales" className="space-y-4">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Sales Analytics</CardTitle>
+                    <CardDescription>A detailed breakdown of sales performance.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-center py-16">
+                     <div className="mx-auto max-w-sm">
+                        <LineChart className="h-12 w-12 text-muted-foreground mx-auto" />
+                        <h3 className="text-lg font-semibold mt-4">Sales Data Coming Soon</h3>
+                        <p className="text-muted-foreground text-sm mt-2">Check back later for a detailed sales analysis.</p>
+                        <Button className="mt-4" variant="outline">Refresh Data</Button>
+                    </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="traffic" className="space-y-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Website Traffic</CardTitle>
+                    <CardDescription>Analysis of visitor sources and behavior.</CardDescription>
+                </CardHeader>
+                <CardContent className="text-center py-16">
+                    <div className="mx-auto max-w-sm">
+                        <TrafficCone className="h-12 w-12 text-muted-foreground mx-auto" />
+                        <h3 className="text-lg font-semibold mt-4">Traffic Analysis Under Construction</h3>
+                        <p className="text-muted-foreground text-sm mt-2">We are currently setting up traffic analytics. Please check back soon.</p>
+                        <Button className="mt-4" variant="outline">Refresh Data</Button>
+                    </div>
+                </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
     )
