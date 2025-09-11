@@ -128,8 +128,12 @@ export default function AddProductPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="price">Price (Ksh)</Label>
-                                    <Input id="price" type="number" placeholder="0.00" />
+                                    <Label htmlFor="original-price">Original Price (Ksh)</Label>
+                                    <Input id="original-price" type="number" placeholder="e.g. 5500.00" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="price">Sale Price (Ksh)</Label>
+                                    <Input id="price" type="number" placeholder="e.g. 4500.00" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="stock">Stock Quantity</Label>
