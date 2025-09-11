@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
@@ -33,9 +34,6 @@ export default function CheckoutPage() {
     const shippingFee = subtotal > 8000 ? 0 : shippingOptions[shippingOption as keyof typeof shippingOptions];
     const total = subtotal + shippingFee;
 
-    // A real implementation would check auth status and redirect to /login if needed.
-    // For now, we assume the user is logged in.
-
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <Header />
@@ -59,7 +57,7 @@ export default function CheckoutPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Shipping Address</CardTitle>
-                                    <CardDescription>Enter your shipping details below.</CardDescription>
+                                    <CardDescription>Enter your shipping details below. The shipping fee will be calculated based on your address.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                      <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
@@ -84,7 +82,7 @@ export default function CheckoutPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Shipping Method</CardTitle>
-                                    <CardDescription>Select your shipping region.</CardDescription>
+                                    <CardDescription>Select your shipping region to see the fee.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <RadioGroup value={shippingOption} onValueChange={setShippingOption} className="space-y-2">
