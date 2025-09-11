@@ -130,9 +130,9 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             </div>
 
             <div className="flex items-baseline gap-2 font-headline">
-              <p className="text-3xl font-bold text-primary">${product.price.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-primary">Ksh {product.price.toFixed(2)}</p>
               {hasDiscount && (
-                <p className="text-xl text-muted-foreground line-through">${product.originalPrice!.toFixed(2)}</p>
+                <p className="text-xl text-muted-foreground line-through">Ksh {product.originalPrice!.toFixed(2)}</p>
               )}
             </div>
             

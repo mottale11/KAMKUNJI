@@ -42,9 +42,9 @@ export function ProductCard({ product }: ProductCardProps) {
                 <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
             </div>
             <div className="flex items-baseline gap-2 font-headline">
-              <p className="text-lg font-bold text-primary">${product.price.toFixed(2)}</p>
+              <p className="text-lg font-bold text-primary">Ksh {product.price.toFixed(2)}</p>
               {hasDiscount && (
-                <p className="text-sm text-muted-foreground line-through">${product.originalPrice!.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground line-through">Ksh {product.originalPrice!.toFixed(2)}</p>
               )}
             </div>
           </div>

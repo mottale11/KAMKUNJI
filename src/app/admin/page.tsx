@@ -11,7 +11,7 @@ import {
     TabsList,
     TabsTrigger,
   } from "@/components/ui/tabs"
-import { DollarSign, Users, CreditCard, Activity } from "lucide-react";
+import { Users, CreditCard, Activity } from "lucide-react";
 import { Overview } from "@/components/admin/overview";
 import { RecentSales } from "@/components/admin/recent-sales";
 
@@ -37,10 +37,10 @@ import { RecentSales } from "@/components/admin/recent-sales";
                   <CardTitle className="text-sm font-medium">
                     Total Revenue
                   </CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Ksh</span>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">$45,231.89</div>
+                  <div className="text-2xl font-bold">4,523,189</div>
                   <p className="text-xs text-muted-foreground">
                     +20.1% from last month
                   </p>

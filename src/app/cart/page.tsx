@@ -18,7 +18,7 @@ export default function CartPage() {
   ];
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
-  const shipping = 5.00;
+  const shipping = subtotal > 8000 ? 0 : 220; // Example shipping for Nairobi county
   const total = subtotal + shipping;
 
   return (
@@ -55,7 +55,7 @@ export default function CartPage() {
                                     <div className="flex-1">
                                         <Link href={`/product/${item.product.id}`} className="font-semibold hover:underline">{item.product.title}</Link>
                                         <p className="text-sm text-muted-foreground">{item.product.category}</p>
-                                        <p className="text-lg font-bold text-primary mt-1">${item.product.price.toFixed(2)}</p>
+                                        <p className="text-lg font-bold text-primary mt-1">Ksh {item.product.price.toFixed(2)}</p>
                                     </div>
                                     <div className="flex items-center gap-2 border rounded-md">
                                         <Button variant="ghost" size="icon" className="h-8 w-8"><Minus className="h-4 w-4" /></Button>
@@ -76,20 +76,22 @@ export default function CartPage() {
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span>Subtotal</span>
-                                        <span className="font-medium">${subtotal.toFixed(2)}</span>
+                                        <span className="font-medium">Ksh {subtotal.toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Shipping</span>
-                                        <span className="font-medium">${shipping.toFixed(2)}</span>
+                                        <span className="font-medium">{shipping > 0 ? `Ksh ${shipping.toFixed(2)}` : 'Free'}</span>
                                     </div>
                                     <Separator />
                                     <div className="flex justify-between text-lg font-bold">
                                         <span>Total</span>
-                                        <span>${total.toFixed(2)}</span>
+                                        <span>Ksh {total.toFixed(2)}</span>
                                     </div>
                                 </div>
-                                <Button size="lg" className="w-full bg-primary hover:bg-primary/90">
+                                <Button asChild size="lg" className="w-full bg-primary hover:bg-primary/90">
+                                  <Link href="/checkout">
                                     Proceed to Checkout <ArrowRight className="ml-2 h-4 w-4" />
+                                  </Link>
                                 </Button>
                             </CardContent>
                         </Card>

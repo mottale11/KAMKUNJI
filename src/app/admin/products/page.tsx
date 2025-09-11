@@ -56,7 +56,7 @@ export default function ProductsPage() {
                                             {product.stock && product.stock > 0 ? "In Stock" : "Out of Stock"}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                                    <TableCell>Ksh {product.price.toFixed(2)}</TableCell>
                                     <TableCell className="hidden md:table-cell">{product.stock || 0}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>

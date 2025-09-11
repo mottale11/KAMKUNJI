@@ -58,7 +58,7 @@ export default function OrdersPage() {
                                         </Badge>
                                     </TableCell>
                                     <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                                    <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">Ksh {order.total.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
