@@ -1,9 +1,13 @@
+
 import { Menu, Search, ShoppingCart, Store, User } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { CircleUserRound, LogOut, Package } from 'lucide-react';
 
 const navLinks = [
   { href: '/categories', label: 'Categories' },
@@ -72,10 +76,38 @@ export function Header() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
-                        <User className="h-5 w-5" />
-                        <span className="sr-only">Account</span>
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <User className="h-5 w-5" />
+                            <span className="sr-only">Account</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/account/profile" className="flex items-center gap-2 cursor-pointer">
+                            <CircleUserRound className="h-4 w-4" />
+                            <span>Profile</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                           <Link href="/account/orders" className="flex items-center gap-2 cursor-pointer">
+                            <Package className="h-4 w-4" />
+                            <span>Orders</span>
+                           </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/login" className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-500">
+                            <LogOut className="h-4 w-4" />
+                            <span>Logout</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <Link href="/cart" className="relative">
                         <Button variant="ghost" size="icon">
                             <ShoppingCart className="h-5 w-5" />
