@@ -14,7 +14,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { mockProducts } from '@/lib/mock-data';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MapPin } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { initiateMpesaPayment } from '@/ai/flows/mpesa-payment';
+
 
 const shippingOptions = {
     'nairobi-cbd': 70,
@@ -24,6 +27,9 @@ const shippingOptions = {
 
 export default function CheckoutPage() {
     const [shippingOption, setShippingOption] = useState('nairobi-county');
+    const [phone, setPhone] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const { toast } = useToast();
 
     const cartItems = [
         { product: mockProducts[0], quantity: 1 },
@@ -33,6 +39,48 @@ export default function CheckoutPage() {
     const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     const shippingFee = subtotal > 8000 ? 0 : shippingOptions[shippingOption as keyof typeof shippingOptions];
     const total = subtotal + shippingFee;
+
+    const handlePayment = async () => {
+        if (!phone || !/^(07|01)\d{8}$/.test(phone)) {
+            toast({
+                variant: 'destructive',
+                title: 'Invalid Phone Number',
+                description: 'Please enter a valid phone number in the format 07XXXXXXXX or 01XXXXXXXX.',
+            });
+            return;
+        }
+
+        setIsProcessing(true);
+        toast({
+            title: 'Processing Payment...',
+            description: 'Sending payment request to your phone.',
+        });
+
+        try {
+            const result = await initiateMpesaPayment({ phone, amount: total });
+            if (result.success) {
+                toast({
+                    title: 'Payment Request Sent',
+                    description: 'Please check your phone to enter your M-Pesa PIN and complete the payment.',
+                });
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Payment Failed',
+                    description: result.message || 'An unknown error occurred.',
+                });
+            }
+        } catch (error) {
+             toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not connect to the payment service. Please try again.',
+            });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -75,7 +123,12 @@ export default function CheckoutPage() {
                                         <Input placeholder="County" />
                                         <Input placeholder="Postal Code" />
                                     </div>
-                                    <Input type="tel" placeholder="Phone" />
+                                    <Input 
+                                        type="tel" 
+                                        placeholder="Phone (e.g. 0712345678)" 
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                    />
                                 </CardContent>
                             </Card>
 
@@ -141,7 +194,16 @@ export default function CheckoutPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Button size="lg" className="w-full">Proceed to Payment</Button>
+                            <Button size="lg" className="w-full bg-green-600 hover:bg-green-700" onClick={handlePayment} disabled={isProcessing}>
+                                {isProcessing ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    'Proceed to Payment (M-Pesa)'
+                                )}
+                            </Button>
                         </div>
                     </div>
                 </div>
