@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 
 import { mockProducts, mockCategories } from '@/lib/mock-data';
 import { Header } from '@/components/layout/header';
@@ -13,6 +14,27 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Minus, Plus, ShoppingCart, CheckCircle } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 
+// A helper component for the WhatsApp button to avoid hydration issues with use-client
+const WhatsAppButton = ({ productUrl, productName }: { productUrl: string, productName: string }) => {
+    const whatsappNumber = "254111882253";
+    const message = encodeURIComponent(`Hello! I'm interested in ordering this product: ${productName}. Product link: ${productUrl}`);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+    const WhatsappIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-5 w-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+    )
+
+    return (
+        <Link href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full bg-green-500 hover:bg-green-600 text-white">
+                <WhatsappIcon />
+                Order via WhatsApp
+            </Button>
+        </Link>
+    );
+};
+
+
 export async function generateStaticParams() {
   return mockProducts.map((product) => ({
     id: product.id,
@@ -20,6 +42,11 @@ export async function generateStaticParams() {
 }
 
 export default function ProductPage({ params }: { params: { id: string } }) {
+  const headersList = headers();
+  const host = headersList.get('host') || '';
+  const protocol = headersList.get('x-forwarded-proto') || 'http';
+  const productUrl = `${protocol}://${host}/product/${params.id}`;
+
   const product = mockProducts.find((p) => p.id === params.id);
 
   if (!product) {
@@ -113,20 +140,23 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             
             <Separator />
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="flex items-center gap-2 border rounded-md">
-                    <Button variant="ghost" size="icon" className="h-10 w-10">
-                        <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="font-bold w-8 text-center">1</span>
-                    <Button variant="ghost" size="icon" className="h-10 w-10">
-                        <Plus className="h-4 w-4" />
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-2 border rounded-md">
+                        <Button variant="ghost" size="icon" className="h-10 w-10">
+                            <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="font-bold w-8 text-center">1</span>
+                        <Button variant="ghost" size="icon" className="h-10 w-10">
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <Button size="lg" className="w-full sm:w-auto flex-1 bg-primary hover:bg-primary/90">
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Add to Cart
                     </Button>
                 </div>
-                <Button size="lg" className="w-full sm:w-auto flex-1 bg-primary hover:bg-primary/90">
-                    <ShoppingCart className="mr-2 h-5 w-5" />
-                    Add to Cart
-                </Button>
+                 <WhatsAppButton productUrl={productUrl} productName={product.title} />
             </div>
           </div>
         </div>
