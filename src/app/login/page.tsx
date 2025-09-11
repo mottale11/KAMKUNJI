@@ -16,7 +16,7 @@ export default function LoginPage() {
             <CardHeader className="text-center">
                  <Link href="/" className="flex items-center justify-center gap-2 font-bold text-xl mb-2">
                     <Store className="h-7 w-7 text-primary" />
-                    <span className="font-headline">E-Market Hub</span>
+                    <span className="font-headline">Kamkunji</span>
                 </Link>
                 <CardTitle className="text-2xl">Welcome Back</CardTitle>
                 <CardDescription>Enter your credentials to access your account.</CardDescription>

@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'E-Market Hub',
+  title: 'Kamkunji',
   description: 'Your one-stop online marketplace for the best deals.',
 };
 

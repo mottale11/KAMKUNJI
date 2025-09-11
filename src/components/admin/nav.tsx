@@ -60,7 +60,7 @@ export function AdminNav() {
             <SidebarHeader>
                 <Link href="/" className="flex items-center gap-2 font-bold text-lg">
                     <Store className="h-6 w-6 text-primary" />
-                    <span className="font-headline">E-Market Hub</span>
+                    <span className="font-headline">Kamkunji</span>
                 </Link>
             </SidebarHeader>
             <SidebarContent className="p-2">

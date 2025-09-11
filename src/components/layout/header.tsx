@@ -21,7 +21,7 @@ export function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
             <Store className="h-6 w-6 text-primary" />
-            <span className="font-headline">E-Market Hub</span>
+            <span className="font-headline">Kamkunji</span>
           </Link>
         </div>
 
@@ -36,7 +36,7 @@ export function Header() {
             <nav className="flex flex-col gap-4">
               <Link href="/" className="flex items-center gap-2 font-bold text-lg">
                 <Store className="h-6 w-6 text-primary" />
-                <span className="font-headline">E-Market Hub</span>
+                <span className="font-headline">Kamkunji</span>
               </Link>
               {navLinks.map((link) => (
                 <Link

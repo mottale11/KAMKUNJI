@@ -46,7 +46,7 @@ export default function AdminProfilePage() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" defaultValue="admin@emarkethub.com" />
+                        <Input id="email" type="email" defaultValue="admin@kamkunji.com" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="password">New Password</Label>

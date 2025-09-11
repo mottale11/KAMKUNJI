@@ -17,7 +17,7 @@ export function Footer() {
             <div className="col-span-full mb-8 lg:col-span-2 lg:mb-0">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl mb-4">
                     <Store className="h-7 w-7 text-primary" />
-                    <span className="font-headline">E-Market Hub</span>
+                    <span className="font-headline">Kamkunji</span>
                 </Link>
                 <p className="text-muted-foreground max-w-md">Your one-stop online marketplace for the best deals on electronics, fashion, home goods, and more.
                 </p>
@@ -53,7 +53,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-muted-foreground">&copy; {new Date().getFullYear()} E-Market Hub. All rights reserved.</p>
+            <p className="text-muted-foreground">&copy; {new Date().getFullYear()} Kamkunji. All rights reserved.</p>
             <div className="flex items-center gap-4">
                 {socialLinks.map((link) => (
                      <Link key={link['aria-label']} href={link.href} aria-label={link['aria-label']} className="text-muted-foreground hover:text-primary transition-colors">

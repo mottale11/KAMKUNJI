@@ -45,7 +45,7 @@ export default function ContactPage() {
                         <div>
                             <h3 className="text-lg font-semibold">Email</h3>
                             <p className="text-muted-foreground">Our support team will get back to you within 24 hours.</p>
-                            <a href="mailto:support@emarkethub.com" className="text-primary font-medium mt-1 inline-block">support@emarkethub.com</a>
+                            <a href="mailto:support@kamkunji.com" className="text-primary font-medium mt-1 inline-block">support@kamkunji.com</a>
                         </div>
                     </CardContent>
                 </Card>
