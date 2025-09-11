@@ -6,6 +6,9 @@ import { AuthProvider } from '@/context/auth-context';
 export const metadata: Metadata = {
   title: 'Kamkunji',
   description: 'Your one-stop online marketplace for the best deals.',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
