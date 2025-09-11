@@ -1,4 +1,4 @@
-
+'use client';
 
 import { Menu, Search, ShoppingCart, User } from 'lucide-react';
 import Link from 'next/link';
@@ -8,6 +8,10 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CircleUserRound, LogOut, Package } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const KamkunjiLogo = () => (
     <svg
@@ -38,6 +42,18 @@ const navLinks = [
 ];
 
 export function Header() {
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Logout Failed', description: 'Could not log you out. Please try again.' });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -97,37 +113,43 @@ export function Header() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                            <User className="h-5 w-5" />
-                            <span className="sr-only">Account</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/account/profile" className="flex items-center gap-2 cursor-pointer">
-                            <CircleUserRound className="h-4 w-4" />
-                            <span>Profile</span>
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                           <Link href="/account/orders" className="flex items-center gap-2 cursor-pointer">
-                            <Package className="h-4 w-4" />
-                            <span>Orders</span>
-                           </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/login" className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-500">
-                            <LogOut className="h-4 w-4" />
-                            <span>Logout</span>
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {loading ? (
+                      <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
+                    ) : user ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                              <User className="h-5 w-5" />
+                              <span className="sr-only">Account</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Hi, {user.displayName?.split(' ')[0] || 'User'}</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href="/account/profile" className="flex items-center gap-2 cursor-pointer">
+                              <CircleUserRound className="h-4 w-4" />
+                              <span>Profile</span>
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                             <Link href="/account/orders" className="flex items-center gap-2 cursor-pointer">
+                              <Package className="h-4 w-4" />
+                              <span>Orders</span>
+                             </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-500">
+                              <LogOut className="h-4 w-4" />
+                              <span>Logout</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href="/login">Login</Link>
+                      </Button>
+                    )}
 
                     <Link href="/cart" className="relative">
                         <Button variant="ghost" size="icon">
