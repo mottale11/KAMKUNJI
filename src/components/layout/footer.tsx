@@ -56,7 +56,7 @@ export function Footer() {
             <p className="text-muted-foreground">&copy; {new Date().getFullYear()} E-Market Hub. All rights reserved.</p>
             <div className="flex items-center gap-4">
                 {socialLinks.map((link) => (
-                     <Link key={link.href} href={link.href} aria-label={link['aria-label']} className="text-muted-foreground hover:text-primary transition-colors">
+                     <Link key={link['aria-label']} href={link.href} aria-label={link['aria-label']} className="text-muted-foreground hover:text-primary transition-colors">
                         <link.icon className="h-5 w-5" />
                     </Link>
                 ))}
