@@ -1,6 +1,6 @@
 {
   "placeholderImages": [
-    { "id": "hero-main", "description": "Hero banner image", "imageUrl": "https://storage.googleapis.com/aip-dev-images-public-test/fx-assets/images/delivery-hero-1.jpeg", "imageHint": "fast delivery" },
+    { "id": "hero-main", "description": "Hero banner image", "imageUrl": "https://storage.googleapis.com/aip-dev-images-public-test/fx-assets/images/shopping-hero.jpeg", "imageHint": "fast delivery" },
     { "id": "cat-electronics", "description": "Electronics category", "imageUrl": "https://picsum.photos/seed/cat1/400/300", "imageHint": "electronics" },
     { "id": "cat-fashion", "description": "Fashion category", "imageUrl": "https://picsum.photos/seed/cat2/400/300", "imageHint": "clothing" },
     { "id": "cat-home", "description": "Home goods category", "imageUrl": "https://picsum.photos/seed/cat3/400/300", "imageHint": "living room" },
