@@ -25,6 +25,14 @@ const shippingOptions = {
     'other-counties': 310
 };
 
+const MpesaLogo = () => (
+    <svg width="25" height="18" viewBox="0 0 25 18" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+        <path d="M18.544 17.22L16.03 13.112L12.484 17.22H10.036L14.788 10.844L11.8 6.4H14.44L16.42 9.536L18.412 6.4H20.932L17.92 10.844L22.696 17.22H20.044L16.42 12.02L18.544 17.22Z" fill="white"/>
+        <path d="M3.4 6.4V17.22H0V6.4H3.4Z" fill="white"/>
+        <path d="M9.1 6.4V17.22H5.7V6.4H9.1Z" fill="white"/>
+    </svg>
+)
+
 export default function CheckoutPage() {
     const [shippingOption, setShippingOption] = useState('nairobi-county');
     const [phone, setPhone] = useState('');
@@ -201,7 +209,10 @@ export default function CheckoutPage() {
                                         Processing...
                                     </>
                                 ) : (
-                                    'Proceed to Payment (M-Pesa)'
+                                    <>
+                                    <MpesaLogo />
+                                    Proceed to Payment (M-Pesa)
+                                    </>
                                 )}
                             </Button>
                         </div>
