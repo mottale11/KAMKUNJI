@@ -6,14 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { CircleUserRound, LogOut, Package } from 'lucide-react';
 
 const navLinks = [
   { href: '/categories', label: 'Categories' },
   { href: '/deals', label: 'Deals' },
   { href: '/new-arrivals', label: 'New Arrivals' },
-  { href: '/admin', label: 'Admin' },
 ];
 
 export function Header() {

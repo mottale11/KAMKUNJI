@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,15 +7,18 @@ import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 export default function ProductsPage() {
     return (
         <>
             <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold">Products</h1>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Product
+                <Button asChild>
+                    <Link href="/admin/products/add">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Product
+                    </Link>
                 </Button>
             </div>
             <Card>

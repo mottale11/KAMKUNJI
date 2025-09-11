@@ -1,3 +1,5 @@
+
+'use client';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,9 +7,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockOrders } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { MoreHorizontal, File } from "lucide-react";
+import { MoreHorizontal, File, Truck } from "lucide-react";
+import { OrderDetailsDialog } from "@/components/admin/order-details-dialog";
+import type { Order } from "@/lib/types";
+import { useState } from "react";
 
 export default function OrdersPage() {
+    const [orders, setOrders] = useState<Order[]>(mockOrders);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+    const handleMarkAsShipped = (orderId: string) => {
+        setOrders(prevOrders => 
+            prevOrders.map(order => 
+                order.id === orderId ? { ...order, status: 'Shipped' } : order
+            )
+        );
+        // Here you would also trigger an API call to update the backend and send an email.
+    };
+
     return (
         <>
             <div className="flex items-center justify-between mb-4">
@@ -37,9 +54,9 @@ export default function OrdersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {mockOrders.map((order) => (
+                            {orders.map((order) => (
                                 <TableRow key={order.id}>
-                                    <TableCell className="font-medium">{order.id}</TableCell>
+                                    <TableCell className="font-medium">#{order.id}</TableCell>
                                     <TableCell>
                                         <div className="font-medium">{order.customer.name}</div>
                                         <div className="text-sm text-muted-foreground hidden md:inline">{order.customer.email}</div>
@@ -69,9 +86,14 @@ export default function OrdersPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>View Details</DropdownMenuItem>
-                                                <DropdownMenuItem>Mark as Shipped</DropdownMenuItem>
-                                                <DropdownMenuItem>Cancel Order</DropdownMenuItem>
+                                                <DropdownMenuItem onSelect={() => setSelectedOrder(order)}>View Details</DropdownMenuItem>
+                                                {order.status === 'Pending' && (
+                                                    <DropdownMenuItem onSelect={() => handleMarkAsShipped(order.id)}>
+                                                        <Truck className="mr-2 h-4 w-4" />
+                                                        Mark as Shipped
+                                                    </DropdownMenuItem>
+                                                )}
+                                                <DropdownMenuItem className="text-red-500 focus:text-red-500">Cancel Order</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
@@ -81,6 +103,17 @@ export default function OrdersPage() {
                     </Table>
                 </CardContent>
             </Card>
+            {selectedOrder && (
+                <OrderDetailsDialog 
+                    order={selectedOrder}
+                    open={!!selectedOrder}
+                    onOpenChange={(isOpen) => {
+                        if (!isOpen) {
+                            setSelectedOrder(null);
+                        }
+                    }}
+                />
+            )}
         </>
     );
 }
