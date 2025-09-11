@@ -76,13 +76,13 @@ export function Header() {
                         <User className="h-5 w-5" />
                         <span className="sr-only">Account</span>
                     </Button>
-                    <div className="relative">
+                    <Link href="/cart" className="relative">
                         <Button variant="ghost" size="icon">
                             <ShoppingCart className="h-5 w-5" />
                             <span className="sr-only">Cart</span>
                         </Button>
                         <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0 text-xs">3</Badge>
-                    </div>
+                    </Link>
                 </div>
             </div>
         </div>
