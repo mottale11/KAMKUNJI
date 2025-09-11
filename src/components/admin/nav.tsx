@@ -23,24 +23,7 @@ import {
 import Link from 'next/link';
 
 const KamkunjiLogo = () => (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-8 w-8"
-    >
-      <circle cx="16" cy="16" r="16" fill="#1E90FF" />
-      <path
-        d="M10 10V22H13.2571L22 10.4375V10H10Z"
-        fill="white"
-      />
-      <path
-        d="M13.2571 22L22 13.75V22H13.2571Z"
-        fill="white"
-      />
-    </svg>
+    <ShoppingCart className="h-8 w-8 text-primary" />
 );
 
 
