@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ArrowRight } from "lucide-react";
@@ -5,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function HeroSection() {
-    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { imageUrl: 'https://picsum.photos/seed/hero/1600/600', imageHint: 'tech gadgets' };
+    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { imageUrl: 'https://storage.googleapis.com/aip-dev-images-public-test/fx-assets/images/delivery.jpeg', imageHint: 'fast delivery' };
 
     return (
         <section className="relative h-[60vh] md:h-[70vh] w-full text-white">
