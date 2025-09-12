@@ -139,7 +139,7 @@ export function Header() {
                             <ShoppingCart className="h-5 w-5" />
                             <span className="sr-only">Cart</span>
                         </Button>
-                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0 text-xs">3</Badge>
+                        
                     </Link>
                 </div>
             </div>
