@@ -1,4 +1,8 @@
+
+'use client';
+
 import Link from 'next/link';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
@@ -6,9 +10,49 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+
+type FormValues = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
 export default function ContactPage() {
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<FormValues>();
+  const { toast } = useToast();
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    try {
+      const response = await fetch('https://formspree.io/f/mrbadegg', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Message Sent!',
+          description: 'Thank you for contacting us. We will get back to you shortly.',
+        });
+        reset();
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Submission Error',
+        description: 'Something went wrong. Please try again later.',
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -77,14 +121,32 @@ export default function ContactPage() {
             <Card>
                 <CardContent className="p-6">
                     <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
-                    <form className="space-y-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div className="grid sm:grid-cols-2 gap-4">
-                            <Input placeholder="Name" />
-                            <Input type="email" placeholder="Email" />
+                            <div className="space-y-1">
+                                <Label htmlFor="name">Name</Label>
+                                <Input id="name" placeholder="John Doe" {...register('name', { required: 'Name is required' })} />
+                                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="email">Email</Label>
+                                <Input id="email" type="email" placeholder="john@example.com" {...register('email', { required: 'Email is required', pattern: { value: /^\S+@\S+$/i, message: 'Invalid email address' } })} />
+                                {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+                            </div>
                         </div>
-                        <Input placeholder="Subject" />
-                        <Textarea placeholder="Your message" rows={6} />
-                        <Button type="submit" size="lg" className="w-full">Send Message</Button>
+                         <div className="space-y-1">
+                            <Label htmlFor="subject">Subject</Label>
+                            <Input id="subject" placeholder="Question about an order" {...register('subject', { required: 'Subject is required' })} />
+                            {errors.subject && <p className="text-sm text-destructive">{errors.subject.message}</p>}
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="message">Your message</Label>
+                            <Textarea id="message" rows={6} {...register('message', { required: 'Message is required' })} />
+                            {errors.message && <p className="text-sm text-destructive">{errors.message.message}</p>}
+                        </div>
+                        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                          {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</> : 'Send Message'}
+                        </Button>
                     </form>
                 </CardContent>
             </Card>
