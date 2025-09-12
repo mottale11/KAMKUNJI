@@ -13,7 +13,7 @@ export default function AccountLayout({
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
       <main className="flex-1">
-        <div className="container py-12 md:py-16">
+        <div className="container py-12 md:py-16 px-4">
             <h1 className="text-3xl font-bold font-headline mb-2">My Account</h1>
             <p className="text-muted-foreground mb-8">Manage your account, view your orders, and more.</p>
             <Separator />

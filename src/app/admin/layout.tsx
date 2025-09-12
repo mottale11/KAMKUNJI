@@ -1,3 +1,4 @@
+
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -41,7 +42,7 @@ export default function AdminLayout({
         <DashboardHeader>
             <SidebarTrigger />
         </DashboardHeader>
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="p-4 lg:p-6 px-4">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -86,7 +86,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 px-4">
         <div className="container py-8">
           <Breadcrumb>
             <BreadcrumbList>
