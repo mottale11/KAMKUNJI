@@ -6,9 +6,6 @@ import { AuthProvider } from '@/context/auth-context';
 export const metadata: Metadata = {
   title: 'Kamkunji',
   description: 'Your one-stop online marketplace for the best deals.',
-  icons: {
-    icon: '/icon.svg',
-  },
 };
 
 export default function RootLayout({
@@ -19,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
