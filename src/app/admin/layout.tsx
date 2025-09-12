@@ -24,7 +24,7 @@ export default function AdminLayout({
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  if (loading || !user || user.email !== 'kamkunjin@gmail.com') {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
