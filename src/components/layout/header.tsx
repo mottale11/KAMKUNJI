@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Menu, Search, ShoppingCart, User } from 'lucide-react';
@@ -12,6 +13,7 @@ import { useAuth } from '@/context/auth-context';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/context/cart-context';
 
 const KamkunjiLogo = () => (
     <ShoppingCart className="h-8 w-8 text-primary" />
@@ -26,6 +28,7 @@ const navLinks = [
 
 export function Header() {
   const { user, loading } = useAuth();
+  const { cart } = useCart();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -36,6 +39,8 @@ export function Header() {
       toast({ variant: 'destructive', title: 'Logout Failed', description: 'Could not log you out. Please try again.' });
     }
   };
+  
+  const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -138,8 +143,10 @@ export function Header() {
                         <Button variant="ghost" size="icon">
                             <ShoppingCart className="h-5 w-5" />
                             <span className="sr-only">Cart</span>
+                             {cartItemCount > 0 && (
+                                <Badge className="absolute -top-2 -right-2 h-5 w-5 justify-center p-0">{cartItemCount}</Badge>
+                            )}
                         </Button>
-                        
                     </Link>
                 </div>
             </div>
@@ -148,3 +155,5 @@ export function Header() {
     </header>
   );
 }
+
+    

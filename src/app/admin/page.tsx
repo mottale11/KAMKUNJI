@@ -20,8 +20,88 @@ import { NewOrders } from "@/components/admin/new-orders";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { collection, getDocs, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Order } from "@/lib/types";
+
+interface DashboardStats {
+    totalRevenue: number;
+    totalSales: number;
+    totalCustomers: number;
+    revenueChange: number;
+    salesChange: number;
+    customerChange: number;
+}
+
 
   export default function DashboardPage() {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            setLoading(true);
+            try {
+                const ordersSnapshot = await getDocs(collection(db, "orders"));
+                const orders = ordersSnapshot.docs.map(doc => doc.data() as Order);
+                
+                const now = new Date();
+                const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+
+                const currentMonthOrders = orders.filter(o => {
+                    const orderDate = (o.date as unknown as Timestamp).toDate();
+                    return orderDate > oneMonthAgo;
+                });
+
+                const previousMonthOrders = orders.filter(o => {
+                    const orderDate = (o.date as unknown as Timestamp).toDate();
+                    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+                    return orderDate > twoMonthsAgo && orderDate <= oneMonthAgo;
+                });
+
+                const totalRevenue = currentMonthOrders.reduce((acc, order) => acc + order.total, 0);
+                const prevMonthRevenue = previousMonthOrders.reduce((acc, order) => acc + order.total, 0);
+
+                const totalSales = currentMonthOrders.length;
+                const prevMonthSales = previousMonthOrders.length;
+
+                const customerEmails = new Set(currentMonthOrders.map(o => o.customer.email));
+                const totalCustomers = customerEmails.size;
+                const prevCustomerEmails = new Set(previousMonthOrders.map(o => o.customer.email));
+                const prevTotalCustomers = prevCustomerEmails.size;
+                
+                const calculateChange = (current: number, previous: number) => {
+                    if (previous === 0) return current > 0 ? 100 : 0;
+                    return ((current - previous) / previous) * 100;
+                };
+
+                setStats({
+                    totalRevenue,
+                    totalSales,
+                    totalCustomers,
+                    revenueChange: calculateChange(totalRevenue, prevMonthRevenue),
+                    salesChange: calculateChange(totalSales, prevMonthSales),
+                    customerChange: calculateChange(totalCustomers, prevTotalCustomers),
+                });
+
+            } catch (error) {
+                console.error("Error fetching dashboard data: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    const formatChange = (change: number) => {
+        if (change === 0) return `+0% from last month`;
+        const sign = change > 0 ? '+' : '';
+        return `${sign}${change.toFixed(1)}% from last month`;
+    };
+
+
     return (
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
@@ -43,9 +123,9 @@ import { Badge } from "@/components/ui/badge";
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">Ksh 0.00</div>
+                  <div className="text-2xl font-bold">Ksh {stats?.totalRevenue.toFixed(2) ?? '0.00'}</div>
                   <p className="text-xs text-muted-foreground">
-                    +0% from last month
+                    {stats ? formatChange(stats.revenueChange) : '+0% from last month'}
                   </p>
                 </CardContent>
               </Card>
@@ -57,9 +137,9 @@ import { Badge } from "@/components/ui/badge";
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+0</div>
+                  <div className="text-2xl font-bold">+{stats?.totalCustomers ?? 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    +0% from last month
+                    {stats ? formatChange(stats.customerChange) : '+0% from last month'}
                   </p>
                 </CardContent>
               </Card>
@@ -69,9 +149,9 @@ import { Badge } from "@/components/ui/badge";
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+0</div>
+                  <div className="text-2xl font-bold">+{stats?.totalSales ?? 0}</div>
                   <p className="text-xs text-muted-foreground">
-                    +0% from last month
+                    {stats ? formatChange(stats.salesChange) : '+0% from last month'}
                   </p>
                 </CardContent>
               </Card>
@@ -103,7 +183,7 @@ import { Badge } from "@/components/ui/badge";
                 <CardHeader>
                   <CardTitle>Recent Sales</CardTitle>
                   <CardDescription>
-                    You have no sales this month.
+                    You made {stats?.totalSales ?? 0} sales this month.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -150,3 +230,5 @@ import { Badge } from "@/components/ui/badge";
         </Tabs>
     )
   }
+
+    

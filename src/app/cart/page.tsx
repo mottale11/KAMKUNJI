@@ -14,28 +14,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import type { Product } from '@/lib/types';
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
+import { useCart } from '@/context/cart-context';
 
 export default function CartPage() {
   const { user, loading } = useAuth();
+  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  // In a real app, you would fetch cart items from a service or context
-  // useEffect(() => {
-  //   const fetchedItems = fetchCartItems(user?.uid);
-  //   setCartItems(fetchedItems);
-  // }, [user]);
 
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+  const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const shipping = subtotal > 8000 ? 0 : 220; // Example shipping for Nairobi county
   const total = subtotal + shipping;
   
@@ -75,10 +63,10 @@ export default function CartPage() {
 
         <div className="container pb-16 lg:pb-24">
             <h1 className="text-3xl font-bold font-headline mb-8">Your Cart</h1>
-            {cartItems.length > 0 ? (
+            {cart.length > 0 ? (
                 <div className="grid lg:grid-cols-3 gap-12 items-start">
                     <div className="lg:col-span-2 space-y-4">
-                        {cartItems.map(item => (
+                        {cart.map(item => (
                             <Card key={item.product.id} className="overflow-hidden">
                                 <CardContent className="p-4 flex gap-4 items-center">
                                     <div className="relative w-24 h-24 rounded-md overflow-hidden">
@@ -90,11 +78,11 @@ export default function CartPage() {
                                         <p className="text-lg font-bold text-primary mt-1">Ksh {item.product.price.toFixed(2)}</p>
                                     </div>
                                     <div className="flex items-center gap-2 border rounded-md">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8"><Minus className="h-4 w-4" /></Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.product.id, item.quantity - 1)}><Minus className="h-4 w-4" /></Button>
                                         <span className="font-bold text-sm w-6 text-center">{item.quantity}</span>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8"><Plus className="h-4 w-4" /></Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.product.id, item.quantity + 1)}><Plus className="h-4 w-4" /></Button>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => removeFromCart(item.product.id)}>
                                         <Trash2 className="h-5 w-5" />
                                     </Button>
                                 </CardContent>
@@ -153,3 +141,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    

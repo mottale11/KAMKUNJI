@@ -1,8 +1,10 @@
 
+'use client'
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { headers } from 'next/headers';
+import { useEffect, useState } from 'react';
 
 import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -14,9 +16,11 @@ import { StarRating } from '@/components/star-rating';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Minus, Plus, ShoppingCart, CheckCircle } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, CheckCircle, Loader2 } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import type { Product } from '@/lib/types';
+import { useCart } from '@/context/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 
 // A helper component for the WhatsApp button to avoid hydration issues with use-client
@@ -40,48 +44,86 @@ const WhatsAppButton = ({ productUrl, productName }: { productUrl: string, produ
 };
 
 
-async function getProduct(id: string) {
-    const docRef = doc(db, "products", id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as Product;
-    }
-    return null;
-}
+export default function ProductPage({ params }: { params: { id: string } }) {
+    const { addToCart } = useCart();
+    const { toast } = useToast();
+    const [product, setProduct] = useState<Product | null>(null);
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [productUrl, setProductUrl] = useState('');
+    const [quantity, setQuantity] = useState(1);
 
-async function getRelatedProducts(category: string, currentProductId: string) {
-    const q = query(
-        collection(db, "products"),
-        where("category", "==", category),
-        limit(5) 
-    );
-    const querySnapshot = await getDocs(q);
-    const products = querySnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Product))
-        .filter(p => p.id !== currentProductId);
-    
-    return products.slice(0, 4);
-}
+    useEffect(() => {
+        setProductUrl(`${window.location.protocol}//${window.location.host}/product/${params.id}`);
+
+        const getProduct = async (id: string) => {
+            const docRef = doc(db, "products", id);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                return { id: docSnap.id, ...docSnap.data() } as Product;
+            }
+            return null;
+        }
+
+        const getRelatedProducts = async (category: string, currentProductId: string) => {
+            const q = query(
+                collection(db, "products"),
+                where("category", "==", category),
+                limit(5)
+            );
+            const querySnapshot = await getDocs(q);
+            const products = querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+                .filter(p => p.id !== currentProductId);
+
+            return products.slice(0, 4);
+        }
+
+        const fetchData = async () => {
+            setLoading(true);
+            const productData = await getProduct(params.id);
+            if (productData) {
+                setProduct(productData);
+                const related = await getRelatedProducts(productData.category, productData.id);
+                setRelatedProducts(related);
+            } else {
+                notFound();
+            }
+            setLoading(false);
+        };
+
+        fetchData();
+    }, [params.id]);
 
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const headersList = headers();
-  const host = headersList.get('host') || '';
-  const protocol = headersList.get('x-forwarded-proto') || 'http';
-  const productUrl = `${protocol}://${host}/product/${params.id}`;
-
-  const product = await getProduct(params.id);
-  
-  if (!product) {
-    notFound();
+  if (loading) {
+      return (
+        <div className="flex flex-col min-h-screen bg-background">
+            <Header />
+            <main className="flex-1 flex items-center justify-center">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </main>
+            <Footer />
+        </div>
+      )
   }
   
-  const relatedProducts = await getRelatedProducts(product.category, product.id);
-
+  if (!product) {
+    return notFound();
+  }
+  
   const category = mockCategories.find((c) => c.name === product.category);
   
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercentage = hasDiscount ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) : 0;
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    toast({
+      title: "Added to Cart",
+      description: `${quantity} x ${product.title} has been added to your cart.`,
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -167,15 +209,15 @@ export default async function ProductPage({ params }: { params: { id: string } }
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="flex items-center gap-2 border rounded-md">
-                        <Button variant="ghost" size="icon" className="h-10 w-10">
+                        <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
                             <Minus className="h-4 w-4" />
                         </Button>
-                        <span className="font-bold w-8 text-center">1</span>
-                        <Button variant="ghost" size="icon" className="h-10 w-10">
+                        <span className="font-bold w-8 text-center">{quantity}</span>
+                        <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => setQuantity(q => Math.min(product.stock || 1, q + 1))}>
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
-                    <Button size="lg" className="w-full sm:w-auto flex-1 bg-primary hover:bg-primary/90">
+                    <Button size="lg" className="w-full sm:w-auto flex-1 bg-primary hover:bg-primary/90" onClick={handleAddToCart} disabled={(product.stock || 0) === 0}>
                         <ShoppingCart className="mr-2 h-5 w-5" />
                         Add to Cart
                     </Button>
@@ -202,7 +244,4 @@ export default async function ProductPage({ params }: { params: { id: string } }
   );
 }
 
-//This is to ensure that Next.js doesn't try to generate static pages for every product at build time.
-export async function generateStaticParams() {
-  return [];
-}
+    
