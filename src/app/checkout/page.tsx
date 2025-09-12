@@ -11,12 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockProducts } from '@/lib/mock-data';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { initiateMpesaPayment } from '@/ai/flows/mpesa-payment';
+import { useCart } from '@/context/cart-context';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 
 const shippingOptions = {
@@ -36,24 +40,31 @@ const MpesaLogo = () => (
 export default function CheckoutPage() {
     const [shippingOption, setShippingOption] = useState('nairobi-county');
     const [phone, setPhone] = useState('');
+    const [name, setName] = useState('');
+    const [address, setAddress] = useState('');
+    const [city, setCity] = useState('');
+    const [county, setCounty] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const { toast } = useToast();
+    const { cart, clearCart } = useCart();
+    const { user } = useAuth();
+    const router = useRouter();
 
-    const cartItems = [
-        { product: mockProducts[0], quantity: 1 },
-        { product: mockProducts[2], quantity: 1 },
-    ];
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+    const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     const shippingFee = subtotal > 8000 ? 0 : shippingOptions[shippingOption as keyof typeof shippingOptions];
     const total = subtotal + shippingFee;
 
     const handlePayment = async () => {
-        if (!phone || !/^(07|01)\d{8}$/.test(phone)) {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Not Logged In', description: 'Please log in to place an order.' });
+            return;
+        }
+        if (!phone || !/^(07|01)\d{8}$/.test(phone) || !name || !address || !city || !county) {
             toast({
                 variant: 'destructive',
-                title: 'Invalid Phone Number',
-                description: 'Please enter a valid phone number in the format 07XXXXXXXX or 01XXXXXXXX.',
+                title: 'Missing Information',
+                description: 'Please fill out all shipping and contact details.',
             });
             return;
         }
@@ -65,18 +76,68 @@ export default function CheckoutPage() {
         });
 
         try {
-            const result = await initiateMpesaPayment({ phone, amount: total });
+            // In a real app, you'd wait for a callback from your payment provider.
+            // Here, we'll simulate a successful payment and create the order.
+            const result = await initiateMpesaPayment({ phone, amount: 1 }); // Use 1 KES for testing
             if (result.success) {
                 toast({
                     title: 'Payment Request Sent',
-                    description: 'Please check your phone to enter your M-Pesa PIN and complete the payment.',
+                    description: 'Please check your phone to complete the payment. Order will be created upon confirmation.',
                 });
+
+                // Simulate waiting for payment confirmation
+                setTimeout(async () => {
+                    try {
+                        const orderData = {
+                            customer: {
+                                name: user.displayName || name,
+                                email: user.email,
+                            },
+                            date: new Date().toISOString(),
+                            status: 'Pending',
+                            total: total,
+                            items: cart.map(item => ({
+                                productId: item.product.id,
+                                quantity: item.quantity,
+                                price: item.product.price, // store price at time of purchase
+                                title: item.product.title,
+                            })),
+                            deliveryInfo: {
+                                name,
+                                phone,
+                                address,
+                                city,
+                                county,
+                            },
+                            createdAt: serverTimestamp()
+                        };
+
+                        await addDoc(collection(db, "orders"), orderData);
+                        
+                        toast({
+                            title: 'Order Placed!',
+                            description: 'Your order has been successfully placed.',
+                        });
+
+                        clearCart();
+                        router.push('/account/orders');
+
+                    } catch(e) {
+                         toast({
+                            variant: 'destructive',
+                            title: 'Order Creation Failed',
+                            description: 'We could not save your order. Please contact support.',
+                        });
+                    }
+                }, 8000); // Simulate 8 second wait for M-Pesa pin
+
             } else {
                 toast({
                     variant: 'destructive',
                     title: 'Payment Failed',
                     description: result.message || 'An unknown error occurred.',
                 });
+                setIsProcessing(false);
             }
         } catch (error) {
              toast({
@@ -84,7 +145,6 @@ export default function CheckoutPage() {
                 title: 'Error',
                 description: 'Could not connect to the payment service. Please try again.',
             });
-        } finally {
             setIsProcessing(false);
         }
     };
@@ -108,6 +168,7 @@ export default function CheckoutPage() {
 
                 <div className="container pb-16 lg:pb-24">
                     <h1 className="text-3xl font-bold font-headline mb-8">Checkout</h1>
+                    {cart.length > 0 ? (
                     <div className="grid lg:grid-cols-3 gap-12 items-start">
                         <div className="lg:col-span-2 space-y-8">
                             <Card>
@@ -116,27 +177,20 @@ export default function CheckoutPage() {
                                     <CardDescription>Enter your shipping details below. The shipping fee will be calculated based on your address.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                     <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
-                                        <MapPin className="h-8 w-8 mr-2" />
-                                        <span>Google Maps Placeholder</span>
+                                     <div className="grid sm:grid-cols-2 gap-4">
+                                        <Input placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} />
+                                        <Input 
+                                            type="tel" 
+                                            placeholder="Phone (e.g. 0712345678)" 
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                        />
                                     </div>
+                                    <Input placeholder="Address (e.g. Street, Building, Floor)" value={address} onChange={e => setAddress(e.target.value)} />
                                     <div className="grid sm:grid-cols-2 gap-4">
-                                        <Input placeholder="First Name" />
-                                        <Input placeholder="Last Name" />
+                                        <Input placeholder="City / Town" value={city} onChange={e => setCity(e.target.value)} />
+                                        <Input placeholder="County" value={county} onChange={e => setCounty(e.target.value)} />
                                     </div>
-                                    <Input placeholder="Address" />
-                                    <Input placeholder="Apartment, suite, etc. (optional)" />
-                                    <div className="grid sm:grid-cols-3 gap-4">
-                                        <Input placeholder="City" />
-                                        <Input placeholder="County" />
-                                        <Input placeholder="Postal Code" />
-                                    </div>
-                                    <Input 
-                                        type="tel" 
-                                        placeholder="Phone (e.g. 0712345678)" 
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                    />
                                 </CardContent>
                             </Card>
 
@@ -180,7 +234,7 @@ export default function CheckoutPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2 text-sm">
-                                    {cartItems.map(item => (
+                                    {cart.map(item => (
                                         <div key={item.product.id} className="flex items-center gap-4">
                                              <div className="relative w-16 h-16 rounded-md overflow-hidden">
                                                 <Image src={item.product.imageUrl} alt={item.product.title} fill className="object-cover" />
@@ -217,9 +271,21 @@ export default function CheckoutPage() {
                             </Button>
                         </div>
                     </div>
+                    ) : (
+                         <div className="text-center py-16 border-dashed border-2 rounded-lg flex flex-col items-center">
+                            <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
+                            <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
+                            <p className="text-muted-foreground mb-6">You need to add items to your cart before you can checkout.</p>
+                            <Button asChild>
+                                <Link href="/">Continue Shopping</Link>
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </main>
             <Footer />
         </div>
     );
 }
+
+    

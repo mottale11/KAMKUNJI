@@ -25,7 +25,7 @@ export interface Order {
   id:string;
   customer: {
     name: string;
-    email: string;
+    email: string | null;
   };
   date: string;
   status: 'Pending' | 'Shipped' | 'Delivered' | 'Canceled';
@@ -33,11 +33,16 @@ export interface Order {
   items: {
     productId: string;
     quantity: number;
+    price: number;
+    title: string;
   }[];
   deliveryInfo: {
     address: string;
     city: string;
-    state: string;
-    zip: string;
+    county: string;
+    name: string;
+    phone: string;
   };
 }
+
+    

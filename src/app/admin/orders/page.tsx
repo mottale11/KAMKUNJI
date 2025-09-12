@@ -1,4 +1,5 @@
 
+
 'use client';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,19 +7,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { MoreHorizontal, File, Truck } from "lucide-react";
+import { MoreHorizontal, File, Truck, Ban } from "lucide-react";
 import { OrderDetailsDialog } from "@/components/admin/order-details-dialog";
 import type { Order } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { collection, getDocs, doc, updateDoc, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
+type ActionType = 'ship' | 'cancel';
 
 export default function OrdersPage() {
     const { toast } = useToast();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [actionOrder, setActionOrder] = useState<{order: Order, type: ActionType} | null>(null);
 
      const fetchOrders = async () => {
         setLoading(true);
@@ -43,20 +57,24 @@ export default function OrdersPage() {
         fetchOrders();
     }, []);
 
-    const handleMarkAsShipped = async (orderId: string) => {
-        const orderRef = doc(db, "orders", orderId);
+    const handleUpdateStatus = async () => {
+        if (!actionOrder) return;
+        
+        const { order, type } = actionOrder;
+        const newStatus = type === 'ship' ? 'Shipped' : 'Canceled';
+        const orderRef = doc(db, "orders", order.id);
+
         try {
-            await updateDoc(orderRef, { status: 'Shipped' });
+            await updateDoc(orderRef, { status: newStatus });
             setOrders(prevOrders => 
-                prevOrders.map(order => 
-                    order.id === orderId ? { ...order, status: 'Shipped' } : order
+                prevOrders.map(o => 
+                    o.id === order.id ? { ...o, status: newStatus } : o
                 )
             );
             toast({
                 title: "Order Updated",
-                description: `Order #${orderId} has been marked as shipped.`,
+                description: `Order #${order.id.slice(0, 7)} has been marked as ${newStatus.toLowerCase()}.`,
             });
-            // Here you would also trigger an API call to send an email.
         } catch (error) {
             console.error("Error updating order status: ", error);
             toast({
@@ -64,6 +82,8 @@ export default function OrdersPage() {
                 title: "Update failed",
                 description: "Failed to update order status.",
             });
+        } finally {
+            setActionOrder(null);
         }
     };
     
@@ -161,12 +181,19 @@ export default function OrdersPage() {
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                     <DropdownMenuItem onSelect={() => setSelectedOrder(order)}>View Details</DropdownMenuItem>
                                                     {order.status === 'Pending' && (
-                                                        <DropdownMenuItem onSelect={() => handleMarkAsShipped(order.id)}>
+                                                        <DropdownMenuItem onSelect={() => setActionOrder({ order, type: 'ship'})}>
                                                             <Truck className="mr-2 h-4 w-4" />
                                                             Mark as Shipped
                                                         </DropdownMenuItem>
                                                     )}
-                                                    <DropdownMenuItem className="text-red-500 focus:text-red-500">Cancel Order</DropdownMenuItem>
+                                                    {order.status === 'Pending' || order.status === 'Shipped' ? (
+                                                    <DropdownMenuItem 
+                                                        className="text-red-500 focus:text-red-500" 
+                                                        onSelect={() => setActionOrder({ order, type: 'cancel' })}>
+                                                        <Ban className="mr-2 h-4 w-4" />
+                                                        Cancel Order
+                                                    </DropdownMenuItem>
+                                                    ) : null}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>
@@ -192,6 +219,24 @@ export default function OrdersPage() {
                     }}
                 />
             )}
+             <AlertDialog open={!!actionOrder} onOpenChange={() => setActionOrder(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will update the order status to "{actionOrder?.type === 'ship' ? 'Shipped' : 'Canceled'}". An email notification may be sent to the customer.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleUpdateStatus}>
+                        Confirm
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
+
+    

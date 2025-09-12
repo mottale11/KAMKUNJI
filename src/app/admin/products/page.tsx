@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, Edit } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -144,7 +144,10 @@ export default function ProductsPage() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                <DropdownMenuItem disabled>
+                                                     <Edit className="mr-2 h-4 w-4" />
+                                                     Edit
+                                                </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     className="text-red-500 focus:text-red-500"
                                                     onSelect={() => setProductToDelete(product)}
@@ -186,3 +189,5 @@ export default function ProductsPage() {
         </>
     );
 }
+
+    
