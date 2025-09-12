@@ -43,37 +43,37 @@ export function FlashDeals() {
                     </div>
                 </div>
 
-                <Carousel
-                    opts={{
-                        align: "start",
-                        loop: true,
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent>
-                        {loading ? (
-                             Array.from({ length: 4 }).map((_, index) => (
-                                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/4">
-                                     <div className="space-y-2">
-                                        <Skeleton className="h-[250px] w-full" />
-                                        <Skeleton className="h-4 w-2/3" />
-                                        <Skeleton className="h-4 w-1/2" />
-                                    </div>
-                                </CarouselItem>
-                            ))
-                        ) : flashDeals.length > 0 ? (
-                            flashDeals.map((product) => (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                            <div key={index} className="space-y-2">
+                                <Skeleton className="h-[250px] w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </div>
+                        ))}
+                    </div>
+                ) : flashDeals.length > 0 ? (
+                    <Carousel
+                        opts={{
+                            align: "start",
+                            loop: true,
+                        }}
+                        className="w-full"
+                    >
+                        <CarouselContent>
+                            {flashDeals.map((product) => (
                                 <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/4">
                                     <ProductCard product={product} />
                                 </CarouselItem>
-                            ))
-                         ) : (
-                            <p>No flash deals available right now.</p>
-                         )}
-                    </CarouselContent>
-                    <CarouselPrevious className="hidden lg:flex" />
-                    <CarouselNext className="hidden lg:flex" />
-                </Carousel>
+                            ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="hidden lg:flex" />
+                        <CarouselNext className="hidden lg:flex" />
+                    </Carousel>
+                ) : (
+                    <p className="text-muted-foreground">No flash deals available right now.</p>
+                )}
             </div>
         </section>
     )
