@@ -1,4 +1,6 @@
 
+'use client'
+
 import {
     Card,
     CardContent,
@@ -35,23 +37,23 @@ import { Button } from "@/components/ui/button";
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">Ksh 4,523,189</div>
+                  <div className="text-2xl font-bold">Ksh 0.00</div>
                   <p className="text-xs text-muted-foreground">
-                    +20.1% from last month
+                    +0% from last month
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Subscriptions
+                    Customers
                   </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+2350</div>
+                  <div className="text-2xl font-bold">+0</div>
                   <p className="text-xs text-muted-foreground">
-                    +180.1% from last month
+                    +0% from last month
                   </p>
                 </CardContent>
               </Card>
@@ -61,9 +63,9 @@ import { Button } from "@/components/ui/button";
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+12,234</div>
+                  <div className="text-2xl font-bold">+0</div>
                   <p className="text-xs text-muted-foreground">
-                    +19% from last month
+                    +0% from last month
                   </p>
                 </CardContent>
               </Card>
@@ -75,9 +77,9 @@ import { Button } from "@/components/ui/button";
                   <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+573</div>
+                  <div className="text-2xl font-bold">+0</div>
                   <p className="text-xs text-muted-foreground">
-                    +201 since last hour
+                    +0 since last hour
                   </p>
                 </CardContent>
               </Card>
@@ -95,7 +97,7 @@ import { Button } from "@/components/ui/button";
                 <CardHeader>
                   <CardTitle>Recent Sales</CardTitle>
                   <CardDescription>
-                    You made 265 sales this month.
+                    You have no sales this month.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

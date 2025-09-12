@@ -9,23 +9,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
-import { mockProducts } from '@/lib/mock-data';
+import { Minus, Plus, Trash2, ArrowRight, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import type { Product } from '@/lib/types';
+
+interface CartItem {
+  product: Product;
+  quantity: number;
+}
 
 export default function CartPage() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const cartItems = [
-    { product: mockProducts[0], quantity: 1 },
-    { product: mockProducts[2], quantity: 1 },
-    { product: mockProducts[4], quantity: 2 },
-  ];
+  // In a real app, you would fetch cart items from a service or context
+  // useEffect(() => {
+  //   const fetchedItems = fetchCartItems(user?.uid);
+  //   setCartItems(fetchedItems);
+  // }, [user]);
+
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
   const shipping = subtotal > 8000 ? 0 : 220; // Example shipping for Nairobi county
@@ -129,7 +137,8 @@ export default function CartPage() {
                     </div>
                 </div>
             ) : (
-                <div className="text-center py-16 border-dashed border-2 rounded-lg">
+                <div className="text-center py-16 border-dashed border-2 rounded-lg flex flex-col items-center">
+                    <ShoppingCartIcon className="h-12 w-12 text-muted-foreground mb-4" />
                     <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
                     <p className="text-muted-foreground mb-6">Looks like you haven't added anything to your cart yet.</p>
                     <Button asChild>

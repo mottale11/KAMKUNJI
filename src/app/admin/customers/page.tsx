@@ -1,21 +1,62 @@
 
 
+'use client'
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockOrders } from "@/lib/mock-data";
 import { MoreHorizontal, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import type { Order } from "@/lib/types";
 
-const customers = mockOrders.map(order => order.customer);
-const uniqueCustomers = Array.from(new Set(customers.map(c => c.email)))
-  .map(email => {
-    return customers.find(c => c.email === email)!;
-  });
+interface Customer {
+    name: string;
+    email: string;
+    totalSpent: number;
+}
 
 export default function CustomersPage() {
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            setLoading(true);
+            const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
+            const querySnapshot = await getDocs(ordersQuery);
+            const orders = querySnapshot.docs.map(doc => doc.data() as Order);
+
+            const customerData: { [email: string]: { name: string, totalSpent: number } } = {};
+
+            orders.forEach(order => {
+                if (order.customer) {
+                    if (customerData[order.customer.email]) {
+                        customerData[order.customer.email].totalSpent += order.total;
+                    } else {
+                        customerData[order.customer.email] = {
+                            name: order.customer.name,
+                            totalSpent: order.total,
+                        };
+                    }
+                }
+            });
+
+            const uniqueCustomers = Object.entries(customerData).map(([email, data]) => ({
+                email,
+                ...data,
+            }));
+            
+            setCustomers(uniqueCustomers);
+            setLoading(false);
+        };
+
+        fetchCustomers();
+    }, []);
+
     return (
         <>
             <div className="flex items-center justify-between mb-4">
@@ -45,41 +86,46 @@ export default function CustomersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {uniqueCustomers.map((customer, index) => (
-                                <TableRow key={customer.email}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage src={`https://picsum.photos/seed/avatar${index+1}/40/40`} />
-                                                <AvatarFallback>{customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                            </Avatar>
-                                            <span className="font-medium">{customer.name}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{customer.email}</TableCell>
-                                    <TableCell className="hidden md:table-cell">Ksh {
-                                        mockOrders
-                                        .filter(o => o.customer.email === customer.email)
-                                        .reduce((acc, o) => acc + o.total, 0)
-                                        .toFixed(2)
-                                    }</TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>View Details</DropdownMenuItem>
-                                                <DropdownMenuItem>Send Message</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center">Loading customers...</TableCell>
                                 </TableRow>
-                            ))}
+                            ) : customers.length > 0 ? (
+                                customers.map((customer, index) => (
+                                    <TableRow key={customer.email}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={`https://picsum.photos/seed/avatar${index+1}/40/40`} />
+                                                    <AvatarFallback>{customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="font-medium">{customer.name}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{customer.email}</TableCell>
+                                        <TableCell className="hidden md:table-cell">Ksh {customer.totalSpent.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Toggle menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                                                    <DropdownMenuItem>Send Message</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center">No customers found.</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

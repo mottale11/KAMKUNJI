@@ -1,14 +1,17 @@
 
+
 'use client'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import type { Order } from "@/lib/types";
-import { mockProducts } from "@/lib/mock-data";
+import type { Order, Product } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { MapPin, User, Mail, Phone } from "lucide-react";
+import { MapPin, User, Mail, Phone, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface OrderDetailsDialogProps {
   order: Order;
@@ -16,11 +19,50 @@ interface OrderDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface OrderProduct extends Product {
+    quantity: number;
+}
+
 export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDialogProps) {
-    const orderProducts = order.items.map(item => {
-        const product = mockProducts.find(p => p.id === item.productId);
-        return product ? { ...product, quantity: item.quantity } : null;
-    }).filter(p => p !== null);
+    const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([]);
+    const [loading, setLoading] = useState(true);
+
+     useEffect(() => {
+        const fetchProducts = async () => {
+            if (!order || !order.items) return;
+
+            setLoading(true);
+            try {
+                const productIds = order.items.map(item => item.productId);
+                if (productIds.length === 0) {
+                     setOrderProducts([]);
+                     setLoading(false);
+                     return;
+                }
+
+                // Firestore 'in' query is limited to 30 elements. 
+                // For a real-world app with larger orders, you might need to batch these requests.
+                const productsQuery = query(collection(db, "products"), where("__name__", "in", productIds));
+                const productsSnapshot = await getDocs(productsQuery);
+                const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+
+                const productsWithQuantity = order.items.map(item => {
+                    const product = productsData.find(p => p.id === item.productId);
+                    return product ? { ...product, quantity: item.quantity } : null;
+                }).filter((p): p is OrderProduct => p !== null);
+
+                setOrderProducts(productsWithQuantity);
+            } catch (error) {
+                console.error("Error fetching product details for order:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (open) {
+            fetchProducts();
+        }
+    }, [order, open]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -28,15 +70,19 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                 <DialogHeader>
                     <DialogTitle>Order Details</DialogTitle>
                     <DialogDescription>
-                        Order #{order.id} - {new Date(order.date).toLocaleDateString()}
+                        Order #{order.id.slice(0, 7)} - {new Date(order.date).toLocaleDateString()}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6">
-                    <div>
-                        <h3 className="font-semibold mb-2">Items</h3>
-                        <div className="space-y-3">
-                            {orderProducts.map(product => (
-                                product && (
+                     {loading ? (
+                         <div className="flex items-center justify-center py-10">
+                             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                         </div>
+                     ) : (
+                        <div>
+                            <h3 className="font-semibold mb-2">Items</h3>
+                            <div className="space-y-3">
+                                {orderProducts.map(product => (
                                     <div key={product.id} className="flex items-center gap-4">
                                         <div className="relative w-16 h-16 rounded-md overflow-hidden border">
                                             <Image src={product.imageUrl} alt={product.title} fill className="object-cover" />
@@ -47,14 +93,14 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                                         </div>
                                         <p className="font-medium">Ksh {(product.price * product.quantity).toFixed(2)}</p>
                                     </div>
-                                )
-                            ))}
+                                ))}
+                            </div>
+                            <Separator className="my-4" />
+                            <div className="flex justify-end items-center">
+                                <span className="text-lg font-bold">Total: Ksh {order.total.toFixed(2)}</span>
+                            </div>
                         </div>
-                        <Separator className="my-4" />
-                        <div className="flex justify-end items-center">
-                            <span className="text-lg font-bold">Total: Ksh {order.total.toFixed(2)}</span>
-                        </div>
-                    </div>
+                     )}
                      <Separator />
                     <div className="grid md:grid-cols-2 gap-6">
                         <div>
@@ -65,13 +111,15 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                                 {order.customer.email}
                             </p>
                         </div>
-                        <div>
-                            <h3 className="font-semibold mb-2 flex items-center gap-2"><MapPin className="h-4 w-4" /> Shipping Address</h3>
-                            <address className="text-sm not-italic text-muted-foreground">
-                                {order.deliveryInfo.address}<br />
-                                {order.deliveryInfo.city}, {order.deliveryInfo.state} {order.deliveryInfo.zip}
-                            </address>
-                        </div>
+                        {order.deliveryInfo && (
+                            <div>
+                                <h3 className="font-semibold mb-2 flex items-center gap-2"><MapPin className="h-4 w-4" /> Shipping Address</h3>
+                                <address className="text-sm not-italic text-muted-foreground">
+                                    {order.deliveryInfo.address}<br />
+                                    {order.deliveryInfo.city}, {order.deliveryInfo.state} {order.deliveryInfo.zip}
+                                </address>
+                            </div>
+                        )}
                     </div>
                      <Separator />
                      <div>

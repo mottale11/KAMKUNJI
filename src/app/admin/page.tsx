@@ -18,7 +18,7 @@ import { Overview } from "@/components/admin/overview";
 import { RecentSales } from "@/components/admin/recent-sales";
 import { NewOrders } from "@/components/admin/new-orders";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
   export default function DashboardPage() {
@@ -30,7 +30,7 @@ import { Badge } from "@/components/ui/badge";
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="notifications">
               Notifications
-              <Badge className="ml-2 bg-red-500 text-white">2</Badge>
+              <Badge className="ml-2 bg-red-500 text-white">0</Badge>
             </TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
@@ -43,23 +43,23 @@ import { Badge } from "@/components/ui/badge";
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">Ksh 4,523,189</div>
+                  <div className="text-2xl font-bold">Ksh 0.00</div>
                   <p className="text-xs text-muted-foreground">
-                    +20.1% from last month
+                    +0% from last month
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Subscriptions
+                    Customers
                   </CardTitle>
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+2350</div>
+                  <div className="text-2xl font-bold">+0</div>
                   <p className="text-xs text-muted-foreground">
-                    +180.1% from last month
+                    +0% from last month
                   </p>
                 </CardContent>
               </Card>
@@ -69,9 +69,9 @@ import { Badge } from "@/components/ui/badge";
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+12,234</div>
+                  <div className="text-2xl font-bold">+0</div>
                   <p className="text-xs text-muted-foreground">
-                    +19% from last month
+                    +0% from last month
                   </p>
                 </CardContent>
               </Card>
@@ -83,9 +83,9 @@ import { Badge } from "@/components/ui/badge";
                   <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+573</div>
+                  <div className="text-2xl font-bold">+0</div>
                   <p className="text-xs text-muted-foreground">
-                    +201 since last hour
+                    +0 since last hour
                   </p>
                 </CardContent>
               </Card>
@@ -103,7 +103,7 @@ import { Badge } from "@/components/ui/badge";
                 <CardHeader>
                   <CardTitle>Recent Sales</CardTitle>
                   <CardDescription>
-                    You made 265 sales this month.
+                    You have no sales this month.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -141,26 +141,9 @@ import { Badge } from "@/components/ui/badge";
                     <CardDescription>Recent activity from your store.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex items-start gap-4 p-4 rounded-lg bg-green-50 border border-green-200">
-                        <div className="bg-green-100 p-2 rounded-full">
-                            <ShoppingBag className="h-5 w-5 text-green-600"/>
-                        </div>
-                        <div>
-                            <p className="font-medium">New Order #ORD006</p>
-                            <p className="text-sm text-muted-foreground">A new order for Ksh 1599.00 was placed by Alex Johnson.</p>
-                            <Button variant="link" className="p-0 h-auto mt-1" onClick={() => toast({ title: "Navigating to order..."})}>View Order</Button>
-                        </div>
-                    </div>
-                     <div className="flex items-start gap-4 p-4 rounded-lg bg-blue-50 border border-blue-200">
-                        <div className="bg-blue-100 p-2 rounded-full">
-                            <Users className="h-5 w-5 text-blue-600"/>
-                        </div>
-                        <div>
-                            <p className="font-medium">New Customer Signup</p>
-                            <p className="text-sm text-muted-foreground">A new customer account was created for "jane.doe@example.com".</p>
-                             <Button variant="link" className="p-0 h-auto mt-1" onClick={() => toast({ title: "Viewing customer..."})}>View Customer</Button>
-                        </div>
-                    </div>
+                   <div className="text-center text-muted-foreground py-8">
+                     No new notifications.
+                   </div>
                 </CardContent>
             </Card>
           </TabsContent>

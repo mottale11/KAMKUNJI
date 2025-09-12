@@ -1,16 +1,51 @@
 
+
+'use client'
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
   } from "@/components/ui/avatar"
-  import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { mockOrders } from "@/lib/mock-data";
+import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useEffect, useState } from "react";
+import type { Order } from "@/lib/types";
   
-  const newOrders = mockOrders.filter(order => order.status === 'Pending');
 
   export function NewOrders() {
+    const [newOrders, setNewOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNewOrders = async () => {
+            setLoading(true);
+            try {
+                const q = query(
+                    collection(db, "orders"), 
+                    where("status", "==", "Pending"), 
+                    orderBy("date", "desc"),
+                    limit(5)
+                );
+                const querySnapshot = await getDocs(q);
+                const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+                setNewOrders(ordersData);
+            } catch (error) {
+                console.error("Error fetching new orders: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNewOrders();
+    }, []);
+
+
+    if (loading) {
+        return <p className="text-sm text-muted-foreground text-center py-4">Loading new orders...</p>;
+    }
+
     return (
       <div className="space-y-6">
         {newOrders.map((order, index) => (
@@ -38,4 +73,3 @@ import { mockOrders } from "@/lib/mock-data";
       </div>
     )
   }
-  
