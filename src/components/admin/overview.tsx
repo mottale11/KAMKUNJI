@@ -21,7 +21,7 @@ export function Overview() {
             const orders = ordersSnapshot.docs.map(doc => doc.data() as Order);
 
             const monthlySales: { [key: string]: number } = {
-                "Jan": 0, "Feb": 0, "Mar": 0, "Apr": 0, "May": 0, "Jun":
+                "Jan": 0, "Feb": 0, "Mar": 0, "Apr": 0, "May": 0, "Jun": 0,
                 "Jul": 0, "Aug": 0, "Sep": 0, "Oct": 0, "Nov": 0, "Dec": 0
             };
 
