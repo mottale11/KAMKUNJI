@@ -1,20 +1,20 @@
 
 {
   "placeholderImages": [
-    { "id": "hero-main", "description": "Hero banner image", "imageUrl": "https://i.pinimg.com/736x/1d/03/e5/1d03e5daf4591eb4188b7ee22fc7b7b9.jpg", "imageHint": "fast delivery" },
-    { "id": "cat-electronics", "description": "Electronics category", "imageUrl": "https://picsum.photos/seed/electronics/400/300", "imageHint": "electronics gadgets" },
-    { "id": "cat-fashion", "description": "Fashion category", "imageUrl": "https://picsum.photos/seed/fashion/400/300", "imageHint": "clothing style" },
-    { "id": "cat-home", "description": "Home goods category", "imageUrl": "https://picsum.photos/seed/homegoods/400/300", "imageHint": "living room" },
-    { "id": "cat-books", "description": "Books category", "imageUrl": "https://picsum.photos/seed/books/400/300", "imageHint": "book library" },
-    { "id": "cat-beauty", "description": "Beauty category", "imageUrl": "https://picsum.photos/seed/beauty/400/300", "imageHint": "cosmetics makeup" },
-    { "id": "cat-sports", "description": "Sports category", "imageUrl": "https://picsum.photos/seed/sports/400/300", "imageHint": "sports equipment" },
-    { "id": "prod-smartwatch", "description": "Smartwatch product", "imageUrl": "https://picsum.photos/seed/prod1/600/600", "imageHint": "smartwatch" },
-    { "id": "prod-headphones", "description": "Headphones product", "imageUrl": "https://picsum.photos/seed/prod2/600/600", "imageHint": "headphones" },
-    { "id": "prod-laptop", "description": "Laptop product", "imageUrl": "https://picsum.photos/seed/prod3/600/600", "imageHint": "laptop" },
-    { "id": "prod-tshirt", "description": "T-shirt product", "imageUrl": "https://picsum.photos/seed/prod4/600/600", "imageHint": "t-shirt" },
-    { "id": "prod-jeans", "description": "Jeans product", "imageUrl": "https://picsum.photos/seed/prod5/600/600", "imageHint": "jeans" },
-    { "id": "prod-sofa", "description": "Sofa product", "imageUrl": "https://picsum.photos/seed/prod6/600/600", "imageHint": "sofa" },
-    { "id": "prod-lamp", "description": "Lamp product", "imageUrl": "https://picsum.photos/seed/prod7/600/600", "imageHint": "desk lamp" },
+    { "id": "hero-main", "description": "Hero banner image", "imageUrl": "https://i.pinimg.com/736x/6f/47/f4/6f47f4efb92b943b906052c95b26c413.jpg", "imageHint": "fast delivery" },
+    { "id": "cat-electronics", "description": "Electronics category", "imageUrl": "https://i.pinimg.com/736x/0f/e9/82/0fe982c8df8fd7458173197f2b041394.jpg", "imageHint": "electronics gadgets" },
+    { "id": "cat-fashion", "description": "Fashion category", "imageUrl": "https://i.pinimg.com/1200x/c5/40/b3/c540b3aeab9aab441cb8b8a155683060.jpg", "imageHint": "clothing style" },
+    { "id": "cat-home", "description": "Home goods category", "imageUrl": "https://i.pinimg.com/736x/ff/f0/40/fff040a679789be226bb4d2a89b0beea.jpg", "imageHint": "living room" },
+    { "id": "cat-books", "description": "Books category", "imageUrl": "https://i.pinimg.com/736x/88/3d/8a/883d8acb789ea481af8b8f004884db5c.jpg", "imageHint": "book library" },
+    { "id": "cat-beauty", "description": "Beauty category", "imageUrl": "https://i.pinimg.com/736x/aa/6b/4d/aa6b4d28be3aeb8e06bc3c5b05c5b442.jpg", "imageHint": "cosmetics makeup" },
+    { "id": "cat-sports", "description": "Sports category", "imageUrl": "https://i.pinimg.com/736x/5f/e1/88/5fe188d3a45f3c85cfc5e8dd10c35d4b.jpg", "imageHint": "sports equipment" },
+    { "id": "prod-smartwatch", "description": "Smartwatch product", "imageUrl": "https://i.pinimg.com/736x/e2/6a/4c/e26a4cc3a3f30c27359bd5a731f85034.jpg", "imageHint": "smartwatch" },
+    { "id": "prod-headphones", "description": "Headphones product", "imageUrl": "https://i.pinimg.com/736x/07/d3/fe/07d3fee8d75f8f150433426164abccce.jpg", "imageHint": "headphones" },
+    { "id": "prod-laptop", "description": "Laptop product", "imageUrl": "https://i.pinimg.com/1200x/7d/c6/8e/7dc68e058388f34df190935050fd354b.jpg", "imageHint": "laptop" },
+    { "id": "prod-tshirt", "description": "T-shirt product", "imageUrl": "https://i.pinimg.com/1200x/22/a0/42/22a042966a6106abf41c8d9b08eeb703.jpg", "imageHint": "t-shirt" },
+    { "id": "prod-jeans", "description": "Jeans product", "imageUrl": "https://i.pinimg.com/1200x/b4/10/45/b4104567dcec243da0955466b9ccfa6d.jpg", "imageHint": "jeans" },
+    { "id": "prod-sofa", "description": "Sofa product", "imageUrl": "https://i.pinimg.com/1200x/44/e5/d2/44e5d214fce11c449398e4ad8a812095.jpg", "imageHint": "sofa" },
+    { "id": "prod-lamp", "description": "Lamp product", "imageUrl": "https://i.pinimg.com/1200x/08/1c/e3/081ce3670121037dc3d5d9b377b7b1d6.jpg", "imageHint": "desk lamp" },
     { "id": "prod-novel", "description": "Novel product", "imageUrl": "https://picsum.photos/seed/prod8/600/600", "imageHint": "book cover" }
   ]
 }
