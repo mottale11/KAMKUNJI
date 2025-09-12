@@ -89,7 +89,7 @@ export default function ContactPage() {
                         <div>
                             <h3 className="text-lg font-semibold">Email</h3>
                             <p className="text-muted-foreground">Our support team will get back to you within 24 hours.</p>
-                            <a href="mailto:support@kamkunji.com" className="text-primary font-medium mt-1 inline-block">support@kamkunji.com</a>
+                            <a href="mailto:kamkunjin@gmail.com" className="text-primary font-medium mt-1 inline-block">kamkunjin@gmail.com</a>
                         </div>
                     </CardContent>
                 </Card>
@@ -101,7 +101,7 @@ export default function ContactPage() {
                         <div>
                             <h3 className="text-lg font-semibold">Phone</h3>
                             <p className="text-muted-foreground">Mon-Fri from 9am to 5pm.</p>
-                            <a href="tel:+1234567890" className="text-primary font-medium mt-1 inline-block">+1 (234) 567-890</a>
+                            <a href="tel:+254111882253" className="text-primary font-medium mt-1 inline-block">+254111882253</a>
                         </div>
                     </CardContent>
                 </Card>
@@ -112,7 +112,7 @@ export default function ContactPage() {
                         </div>
                         <div>
                             <h3 className="text-lg font-semibold">Office</h3>
-                            <p className="text-muted-foreground">123 E-Market Street, Commerce City, 12345</p>
+                            <p className="text-muted-foreground">Lakisama, Nairobi</p>
                             <a href="#" className="text-primary font-medium mt-1 inline-block">Get Directions</a>
                         </div>
                     </CardContent>
