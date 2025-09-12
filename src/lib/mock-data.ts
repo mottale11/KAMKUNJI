@@ -128,14 +128,16 @@ export const mockOrders: Order[] = [
         status: 'Shipped',
         total: 42400.00,
         items: [
-            { productId: 'prod1', quantity: 1 },
+            { productId: 'prod1', quantity: 1, price: 39900, title: 'Smartwatch Series 7' },
         ],
         deliveryInfo: {
+            name: 'Olivia Martin',
+            phone: '123-456-7890',
             address: '123 Main St',
             city: 'San Francisco',
-            state: 'CA',
-            zip: '94103'
-        }
+            county: 'CA'
+        },
+        createdAt: '2023-11-23T10:00:00Z'
     },
     {
         id: 'ORD002',
@@ -143,13 +145,15 @@ export const mockOrders: Order[] = [
         date: '2023-11-22',
         status: 'Delivered',
         total: 27900.00,
-        items: [{ productId: 'prod2', quantity: 1 }],
-        deliveryInfo: {
+        items: [{ productId: 'prod2', quantity: 1, price: 27900, title: 'Wireless Noise-Cancelling Headphones' }],
+         deliveryInfo: {
+            name: 'Jackson Lee',
+            phone: '123-456-7890',
             address: '456 Oak Ave',
             city: 'New York',
-            state: 'NY',
-            zip: '10001'
-        }
+            county: 'NY'
+        },
+        createdAt: '2023-11-22T10:00:00Z'
     },
     {
         id: 'ORD003',
@@ -157,13 +161,15 @@ export const mockOrders: Order[] = [
         date: '2023-11-21',
         status: 'Pending',
         total: 132400.00,
-        items: [{ productId: 'prod3', quantity: 1 }],
+        items: [{ productId: 'prod3', quantity: 1, price: 129900, title: 'Ultra-Slim Laptop' }],
         deliveryInfo: {
+            name: 'Isabella Nguyen',
+            phone: '123-456-7890',
             address: '789 Pine Rd',
             city: 'Austin',
-            state: 'TX',
-            zip: '78701'
-        }
+            county: 'TX'
+        },
+        createdAt: '2023-11-21T10:00:00Z'
     },
     {
         id: 'ORD004',
@@ -171,13 +177,15 @@ export const mockOrders: Order[] = [
         date: '2023-11-20',
         status: 'Delivered',
         total: 5000.00,
-        items: [{ productId: 'prod4', quantity: 2 }],
+        items: [{ productId: 'prod4', quantity: 2, price: 2500, title: 'Classic Cotton T-Shirt' }],
         deliveryInfo: {
+            name: 'William Kim',
+            phone: '123-456-7890',
             address: '101 Maple Ln',
             city: 'Chicago',
-            state: 'IL',
-            zip: '60607'
-        }
+            county: 'IL'
+        },
+        createdAt: '2023-11-20T10:00:00Z'
     },
     {
         id: 'ORD005',
@@ -185,12 +193,14 @@ export const mockOrders: Order[] = [
         date: '2023-11-19',
         status: 'Canceled',
         total: 89900.00,
-        items: [{ productId: 'prod5', quantity: 1 }],
+        items: [{ productId: 'prod5', quantity: 1, price: 89900, title: 'Modern Minimalist Sofa' }],
         deliveryInfo: {
+            name: 'Sofia Davis',
+            phone: '123-456-7890',
             address: '212 Birch Blvd',
             city: 'Los Angeles',
-            state: 'CA',
-            zip: '90012'
-        }
+            county: 'CA'
+        },
+        createdAt: '2023-11-19T10:00:00Z'
     }
 ];

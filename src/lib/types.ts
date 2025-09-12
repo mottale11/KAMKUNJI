@@ -1,4 +1,5 @@
 
+
 export interface Product {
   id: string;
   title: string;
@@ -38,12 +39,13 @@ export interface Order {
     title: string;
   }[];
   deliveryInfo: {
-    name: string,
-    phone: string,
-    address: string,
-    city: string,
-    county: string,
+    name: string;
+    phone: string;
+    address: string;
+    city: string;
+    county: string;
   };
+  createdAt: any;
 }
 
     
