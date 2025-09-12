@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ShoppingCart } from 'lucide-react';
+import { FirebaseError } from 'firebase/app';
 
 const KamkunjiLogo = () => (
     <ShoppingCart className="h-8 w-8 text-primary" />
@@ -29,6 +30,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     const adminEmail = 'kamkunjin@gmail.com';
+    const adminPassword = '$Mottale11';
 
     if (email.toLowerCase() !== adminEmail) {
         toast({
@@ -42,24 +44,44 @@ export default function AdminLoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Double check after login
-      if (auth.currentUser?.email === adminEmail) {
-        toast({
-            title: "Admin Login Successful",
-            description: "Welcome back, Admin!",
-        });
-        router.push('/admin');
-      } else {
-        await signOut(auth); // Sign out if it's not the admin user
-        throw new Error("Invalid credentials for admin access.");
-      }
-    } catch (error: any) {
-      console.error("Error signing in as admin:", error);
-       toast({
-        variant: "destructive",
-        title: "Sign In Failed",
-        description: error.message,
+      toast({
+          title: "Admin Login Successful",
+          description: "Welcome back, Admin!",
       });
+      router.push('/admin');
+    } catch (error: any) {
+        if (error instanceof FirebaseError && (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found')) {
+            // If user doesn't exist, try to create it
+            if (password === adminPassword) {
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    toast({
+                        title: "Admin Account Created",
+                        description: "Your admin account has been set up. Logging in...",
+                    });
+                    router.push('/admin');
+                } catch (createError: any) {
+                    toast({
+                        variant: "destructive",
+                        title: "Admin Creation Failed",
+                        description: createError.message,
+                    });
+                }
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Sign In Failed",
+                    description: "The password provided is incorrect.",
+                });
+            }
+        } else {
+            console.error("Error signing in as admin:", error);
+            toast({
+                variant: "destructive",
+                title: "Sign In Failed",
+                description: error.message || "An unexpected error occurred.",
+            });
+        }
     } finally {
       setLoading(false);
     }
