@@ -30,8 +30,8 @@ const productSchema = z.object({
       z.number().positive("Price must be a positive number")
     ),
     originalPrice: z.preprocess(
-        (a) => (a === '' ? undefined : parseFloat(z.string().parse(a))),
-        z.number().positive("Original price must be a positive number").optional()
+      (a) => (a === '' || a === undefined || a === null ? undefined : parseFloat(z.string().parse(a))),
+      z.number().positive("Original price must be a positive number").optional().nullable()
     ),
     stock: z.preprocess(
       (a) => parseInt(z.string().parse(a), 10),
@@ -283,3 +283,5 @@ export default function AddProductPage() {
         </>
     );
 }
+
+    
