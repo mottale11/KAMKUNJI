@@ -1,37 +1,41 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if user is admin
+    
+    // HELPER FUNCTIONS
     function isAdmin() {
       return request.auth != null && request.auth.token.email == 'kamkunjin@gmail.com';
     }
 
-    // Products can be read by anyone, but only written by an admin
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // PUBLIC COLLECTIONS
+    // Allow anyone to read products and categories. Only admins can write.
     match /products/{productId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Categories can be read by anyone, but only written by an admin
     match /categories/{categoryId} {
       allow read: if true;
       allow write: if isAdmin();
     }
     
-    // Customers can only be read or written by an admin
-    match /customers/{customerId} {
-      allow read, write: if isAdmin();
-    }
-
-    // Orders can be created by any authenticated user.
-    // Users can only read their own orders.
-    // Admins can read and update any order.
+    // USER-SPECIFIC COLLECTIONS
+    // Allow users to create orders. Users can only read their own orders.
+    // Admins can read all orders.
     match /orders/{orderId} {
       allow create: if request.auth != null;
-      allow read: if request.auth != null && (resource.data.customer.email == request.auth.token.email || isAdmin());
-      allow update: if isAdmin() || (request.auth != null && resource.data.customer.email == request.auth.token.email);
+      allow read: if isAdmin() || (request.auth != null && request.resource.data.customer.email == request.auth.token.email);
+      allow update, delete: if isAdmin() || (request.auth != null && request.resource.data.customer.email == request.auth.token.email);
+    }
+    
+    // ADMIN-ONLY COLLECTIONS
+    // Only admins can read or write to the customers collection.
+    match /customers/{customerId} {
+      allow read, write: if isAdmin();
     }
   }
 }

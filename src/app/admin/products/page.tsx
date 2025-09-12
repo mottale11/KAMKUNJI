@@ -10,7 +10,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +35,8 @@ export default function ProductsPage() {
 
     const fetchProducts = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, "products"));
+            const productsQuery = query(collection(db, "products"), orderBy("title", "asc"));
+            const querySnapshot = await getDocs(productsQuery);
             const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
             setProducts(productsData);
         } catch (err) {
@@ -190,4 +191,3 @@ export default function ProductsPage() {
     );
 }
 
-    
