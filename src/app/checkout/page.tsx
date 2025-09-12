@@ -1,7 +1,7 @@
 
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Header } from '@/components/layout/header';
@@ -49,6 +49,11 @@ export default function CheckoutPage() {
     const { cart, clearCart } = useCart();
     const { user } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        if (!user) return;
+        setName(user.displayName || '');
+    }, [user])
 
 
     const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
@@ -128,6 +133,8 @@ export default function CheckoutPage() {
                             title: 'Order Creation Failed',
                             description: 'We could not save your order. Please contact support.',
                         });
+                    } finally {
+                        setIsProcessing(false);
                     }
                 }, 8000); // Simulate 8 second wait for M-Pesa pin
 
@@ -265,7 +272,7 @@ export default function CheckoutPage() {
                                 ) : (
                                     <>
                                     <MpesaLogo />
-                                    Proceed to Payment (M-Pesa)
+                                    Pay with M-Pesa (Ksh {total.toFixed(2)})
                                     </>
                                 )}
                             </Button>
@@ -287,5 +294,3 @@ export default function CheckoutPage() {
         </div>
     );
 }
-
-    

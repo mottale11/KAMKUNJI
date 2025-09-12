@@ -4,17 +4,30 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Package, User, Heart, Settings, LogOut } from 'lucide-react';
+import { Package, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const navItems = [
   { href: '/account/orders', label: 'My Orders', icon: Package },
   { href: '/account/profile', label: 'My Profile', icon: User },
-  { href: '/account/wishlist', label: 'Wishlist', icon: Heart },
-  { href: '/account/settings', label: 'Settings', icon: Settings },
 ];
 
 export function AccountNav() {
   const pathname = usePathname();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Logout Failed', description: 'Could not log you out. Please try again.' });
+    }
+  };
+
 
   return (
     <nav className="flex flex-col gap-2">
@@ -32,12 +45,10 @@ export function AccountNav() {
           </Button>
         </Link>
       ))}
-      <Link href="/login">
-        <Button variant="ghost" className="w-full justify-start gap-3 text-red-500 hover:text-red-500 hover:bg-red-500/10">
-            <LogOut className="h-5 w-5" />
-            <span>Logout</span>
-        </Button>
-      </Link>
+      <Button onClick={handleLogout} variant="ghost" className="w-full justify-start gap-3 text-red-500 hover:text-red-500 hover:bg-red-500/10">
+          <LogOut className="h-5 w-5" />
+          <span>Logout</span>
+      </Button>
     </nav>
   );
 }

@@ -1,13 +1,38 @@
 
+'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { mockProducts } from '@/lib/mock-data';
 import { ProductCard } from '@/components/product-card';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NewArrivalsPage() {
-  const newArrivals = mockProducts.slice(0, 8);
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNewArrivals = async () => {
+      setLoading(true);
+      try {
+        const q = query(collection(db, "products"), where("isNewArrival", "==", true), limit(12));
+        const querySnapshot = await getDocs(q);
+        const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+        setNewArrivals(productsData);
+      } catch (error) {
+        console.error("Error fetching new arrivals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNewArrivals();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -31,9 +56,21 @@ export default function NewArrivalsPage() {
         <div className="container pb-16 lg:pb-24">
           <h1 className="text-3xl font-bold font-headline mb-8">New Arrivals</h1>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {newArrivals.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+             {loading ? (
+              Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                    <Skeleton className="h-[250px] w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))
+            ) : newArrivals.length > 0 ? (
+              newArrivals.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <p className="col-span-full text-center text-muted-foreground">There are no new arrivals at the moment. Please check back later!</p>
+            )}
           </div>
         </div>
       </main>
