@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -40,8 +39,6 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                      return;
                 }
 
-                // Firestore 'in' query is limited to 30 elements. 
-                // For a real-world app with larger orders, you might need to batch these requests.
                 const productsQuery = query(collection(db, "products"), where("__name__", "in", productIds));
                 const productsSnapshot = await getDocs(productsQuery);
                 const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -110,13 +107,20 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                                 <Mail className="h-3 w-3" />
                                 {order.customer.email}
                             </p>
+                             {order.deliveryInfo?.phone && (
+                                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                    <Phone className="h-3 w-3" />
+                                    {order.deliveryInfo.phone}
+                                </p>
+                             )}
                         </div>
                         {order.deliveryInfo && (
                             <div>
                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><MapPin className="h-4 w-4" /> Shipping Address</h3>
                                 <address className="text-sm not-italic text-muted-foreground">
+                                    {order.deliveryInfo.name}<br />
                                     {order.deliveryInfo.address}<br />
-                                    {order.deliveryInfo.city}, {order.deliveryInfo.state} {order.deliveryInfo.zip}
+                                    {order.deliveryInfo.city}, {order.deliveryInfo.county}
                                 </address>
                             </div>
                         )}
@@ -141,3 +145,4 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
         </Dialog>
     );
 }
+

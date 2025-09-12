@@ -1,5 +1,4 @@
 
-
 'use client'
 import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import Link from "next/link";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Order } from "@/lib/types";
 
 interface Customer {
+    id: string;
     name: string;
     email: string;
+    phone?: string;
     totalSpent: number;
 }
 
@@ -24,37 +24,44 @@ export default function CustomersPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchCustomers = async () => {
+        const fetchCustomersAndOrders = async () => {
             setLoading(true);
-            const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
-            const querySnapshot = await getDocs(ordersQuery);
-            const orders = querySnapshot.docs.map(doc => doc.data() as Order);
+            try {
+                // Fetch all orders to calculate spending
+                const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
+                const ordersSnapshot = await getDocs(ordersQuery);
+                const orders = ordersSnapshot.docs.map(doc => doc.data());
 
-            const customerData: { [email: string]: { name: string, totalSpent: number } } = {};
-
-            orders.forEach(order => {
-                if (order.customer) {
-                    if (customerData[order.customer.email]) {
-                        customerData[order.customer.email].totalSpent += order.total;
-                    } else {
-                        customerData[order.customer.email] = {
-                            name: order.customer.name,
-                            totalSpent: order.total,
-                        };
+                const spendingData: { [email: string]: number } = {};
+                orders.forEach(order => {
+                    if (order.customer && order.customer.email) {
+                        spendingData[order.customer.email] = (spendingData[order.customer.email] || 0) + order.total;
                     }
-                }
-            });
+                });
 
-            const uniqueCustomers = Object.entries(customerData).map(([email, data]) => ({
-                email,
-                ...data,
-            }));
-            
-            setCustomers(uniqueCustomers);
-            setLoading(false);
+                // Fetch all customers from the 'customers' collection
+                const customersQuery = query(collection(db, "customers"), orderBy("createdAt", "desc"));
+                const customersSnapshot = await getDocs(customersQuery);
+                const customerList = customersSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.name,
+                        email: data.email,
+                        phone: data.phone,
+                        totalSpent: spendingData[data.email] || 0,
+                    };
+                });
+                
+                setCustomers(customerList);
+            } catch (error) {
+                console.error("Error fetching customer data:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
-        fetchCustomers();
+        fetchCustomersAndOrders();
     }, []);
 
     return (
@@ -92,7 +99,7 @@ export default function CustomersPage() {
                                 </TableRow>
                             ) : customers.length > 0 ? (
                                 customers.map((customer, index) => (
-                                    <TableRow key={customer.email}>
+                                    <TableRow key={customer.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar>
