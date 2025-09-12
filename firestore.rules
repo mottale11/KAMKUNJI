@@ -1,0 +1,25 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Products can be read by anyone, but only modified by an admin.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email == 'kamkunjin@gmail.com';
+    }
+
+    // Orders can only be created by authenticated users for themselves.
+    // Orders can only be read/updated by the user who owns it or an admin.
+    match /orders/{orderId} {
+      allow read, update: if request.auth != null && (request.resource.data.customer.email == request.auth.token.email || request.auth.token.email == 'kamkunjin@gmail.com');
+      allow create: if request.auth != null && request.resource.data.customer.email == request.auth.token.email;
+    }
+
+    // Allow admin to read from any collection for analytics/customer lists
+    match /{document=**} {
+        allow read: if request.auth != null && request.auth.token.email == 'kamkunjin@gmail.com';
+    }
+  }
+}
