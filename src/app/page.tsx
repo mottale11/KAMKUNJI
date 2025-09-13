@@ -12,13 +12,13 @@ import type { Product, Category } from '@/lib/types';
 async function getHomePageData() {
   try {
     const categoriesPromise = supabase.from('categories').select('*').limit(6);
-    const flashDealsPromise = supabase.from('products').select('*').eq('is_flash_deal', true).order('created_at', { ascending: false }).limit(8);
-    const newArrivalsPromise = supabase.from('products').select('*').eq('is_new_arrival', true).order('created_at', { ascending: false }).limit(8);
+    const flashDealsPromise = supabase.from('products').select('*, categories(name)').eq('is_flash_deal', true).order('created_at', { ascending: false }).limit(8);
+    const newArrivalsPromise = supabase.from('products').select('*, categories(name)').eq('is_new_arrival', true).order('created_at', { ascending: false }).limit(8);
     
     const [
         { data: categories, error: catError }, 
-        { data: flashDeals, error: flashError }, 
-        { data: newArrivals, error: arrivalsError }
+        { data: flashDealsData, error: flashError }, 
+        { data: newArrivalsData, error: arrivalsError }
     ] = await Promise.all([categoriesPromise, flashDealsPromise, newArrivalsPromise]);
 
     if (catError) console.error("Error fetching categories:", catError.message);
@@ -27,19 +27,17 @@ async function getHomePageData() {
 
     const safeCategories = categories || [];
 
-    const categoryMap = new Map(safeCategories.map(cat => [cat.id, cat.name]));
-
-    const addCategoryName = (products: Product[] | null) => {
+    const processProducts = (products: any[] | null) => {
         return (products || []).map(p => ({
             ...p,
-            categoryName: categoryMap.get(p.category_id) || "Uncategorized",
+            categoryName: (p.categories as Category)?.name || "Uncategorized",
         }));
     };
 
     return {
-      categories: safeCategories,
-      flashDeals: addCategoryName(flashDeals),
-      newArrivals: addCategoryName(newArrivals),
+      categories: safeCategories as Category[],
+      flashDeals: processProducts(flashDealsData) as Product[],
+      newArrivals: processProducts(newArrivalsData) as Product[],
     };
 
   } catch (error) {

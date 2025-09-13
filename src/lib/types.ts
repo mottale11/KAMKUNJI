@@ -13,7 +13,8 @@ export interface Product {
   is_new_arrival?: boolean;
   is_flash_deal?: boolean;
   created_at?: string;
-  categoryName?: string; 
+  categoryName?: string;
+  categories?: { name: string } | null;
 }
 
 export interface Category {

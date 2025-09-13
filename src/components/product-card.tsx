@@ -59,8 +59,8 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
             <div className="flex items-baseline gap-2 font-headline mt-auto pt-2">
               <p className="text-lg font-bold text-primary">Ksh {product.price.toFixed(2)}</p>
-              {hasDiscount && (
-                <p className="text-sm text-muted-foreground line-through">Ksh {product.original_price!.toFixed(2)}</p>
+              {hasDiscount && product.original_price && (
+                <p className="text-sm text-muted-foreground line-through">Ksh {product.original_price.toFixed(2)}</p>
               )}
             </div>
           </div>

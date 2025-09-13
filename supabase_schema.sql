@@ -1,82 +1,78 @@
 
--- Drop existing tables to start fresh
-DROP TABLE IF EXISTS "orders";
-DROP TABLE IF EXISTS "products";
-DROP TABLE IF EXISTS "customers";
-DROP TABLE IF EXISTS "categories";
+-- 1. Drop existing tables if they exist to ensure a clean slate.
+DROP TABLE IF EXISTS "orders" CASCADE;
+DROP TABLE IF EXISTS "products" CASCADE;
+DROP TABLE IF EXISTS "customers" CASCADE;
+DROP TABLE IF EXISTS "categories" CASCADE;
 
--- Create Categories Table
-CREATE TABLE categories (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL,
-    image_url TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT now()
+-- 2. Create Categories Table
+-- This table will store product categories. 'id' is the primary key.
+CREATE TABLE "categories" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "name" text NOT NULL,
+    "image_url" text NOT NULL,
+    "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
--- Create Products Table
-CREATE TABLE products (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    title TEXT NOT NULL,
-    description TEXT,
-    price REAL NOT NULL,
-    original_price REAL,
-    category_id uuid REFERENCES categories(id),
-    category TEXT, -- Denormalized for convenience
-    stock INTEGER DEFAULT 0,
-    rating REAL DEFAULT 0,
-    review_count INTEGER DEFAULT 0,
-    image_url TEXT NOT NULL,
-    is_new_arrival BOOLEAN DEFAULT false,
-    is_flash_deal BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT now()
+-- 3. Create Products Table
+-- This table stores all product information. It links to the categories table.
+CREATE TABLE "products" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "title" text NOT NULL,
+    "description" text,
+    "price" numeric(10, 2) NOT NULL,
+    "original_price" numeric(10, 2),
+    "category_id" uuid REFERENCES "categories"("id") ON DELETE SET NULL,
+    "image_url" text,
+    "rating" numeric(3, 2) DEFAULT 0,
+    "review_count" integer DEFAULT 0,
+    "stock" integer DEFAULT 0,
+    "is_new_arrival" boolean DEFAULT false,
+    "is_flash_deal" boolean DEFAULT false,
+    "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
--- Create Customers Table
--- Note: This table is for storing customer-specific data not in auth.users
-CREATE TABLE customers (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT,
-    email TEXT UNIQUE,
-    phone TEXT,
-    created_at TIMESTAMPTZ DEFAULT now()
+-- 4. Create Customers Table
+-- Stores customer information. This is separate from Supabase's auth.users table.
+CREATE TABLE "customers" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "name" text NOT NULL,
+    "email" text UNIQUE NOT NULL,
+    "phone" text,
+    "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
--- Create Orders Table
-CREATE TABLE orders (
-    id BIGSERIAL PRIMARY KEY,
-    customer JSONB,
-    status TEXT NOT NULL CHECK (status IN ('Pending', 'Shipped', 'Delivered', 'Canceled')),
-    total REAL NOT NULL,
-    items JSONB,
-    delivery_info JSONB,
-    created_at TIMESTAMPTZ DEFAULT now()
+-- 5. Create Orders Table
+-- Stores order information, linking customer details and items purchased in a JSONB field.
+CREATE TABLE "orders" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "customer" jsonb,
+    "status" text CHECK (status IN ('Pending', 'Shipped', 'Delivered', 'Canceled')),
+    "total" numeric(10, 2) NOT NULL,
+    "items" jsonb,
+    "delivery_info" jsonb,
+    "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
+-- 6. Insert Sample Data into Categories
+-- Populating the categories table with a variety of common e-commerce categories.
+INSERT INTO "categories" ("name", "image_url") VALUES
+('Electronics', 'https://picsum.photos/seed/electronics/300/300'),
+('Fashion', 'https://picsum.photos/seed/fashion/300/300'),
+('Home & Kitchen', 'https://picsum.photos/seed/kitchen/300/300'),
+('Sports & Outdoors', 'https://picsum.photos/seed/sports/300/300'),
+('Books', 'https://picsum.photos/seed/books/300/300'),
+('Health & Beauty', 'https://picsum.photos/seed/beauty/300/300'),
+('Toys & Games', 'https://picsum.photos/seed/toys/300/300'),
+('Automotive', 'https://picsum.photos/seed/automotive/300/300'),
+('Groceries', 'https://picsum.photos/seed/groceries/300/300'),
+('Pet Supplies', 'https://picsum.photos/seed/pets/300/300'),
+('Computers', 'https://picsum.photos/seed/computers/300/300'),
+('Garden & Tools', 'https://picsum.photos/seed/garden/300/300');
 
--- Insert Sample Categories
-INSERT INTO categories (name, image_url) VALUES
-('Electronics', 'https://picsum.photos/seed/electronics/600/600'),
-('Fashion', 'https://picsum.photos/seed/fashion/600/600'),
-('Home & Kitchen', 'https://picsum.photos/seed/home/600/600'),
-('Books', 'https://picsum.photos/seed/books/600/600'),
-('Sports & Outdoors', 'https://picsum.photos/seed/sports/600/600'),
-('Toys & Games', 'https://picsum.photos/seed/toys/600/600'),
-('Health & Beauty', 'https://picsum.photos/seed/beauty/600/600'),
-('Automotive', 'https://picsum.photos/seed/automotive/600/600'),
-('Garden & Tools', 'https://picsum.photos/seed/garden/600/600'),
-('Groceries', 'https://picsum.photos/seed/groceries/600/600'),
-('Pet Supplies', 'https://picsum.photos/seed/pets/600/600'),
-('Handmade', 'https://picsum.photos/seed/handmade/600/600');
-
--- Example of how to add a sample product (optional, can be done via app)
--- INSERT INTO products (title, description, price, category_id, image_url, stock, category)
--- SELECT
---     'Sample Laptop',
---     'A great laptop for all your needs.',
---     1200.00,
---     c.id,
---     'https://picsum.photos/seed/laptop/600/400',
---     50,
---     'Electronics'
--- FROM categories c WHERE c.name = 'Electronics';
+-- 7. Add Indexes for Performance
+-- Creating indexes on frequently queried columns to improve database performance.
+CREATE INDEX idx_products_category_id ON "products" ("category_id");
+CREATE INDEX idx_orders_customer_email ON "orders" ((customer->>'email'));
+CREATE INDEX idx_orders_status ON "orders" ("status");
 
