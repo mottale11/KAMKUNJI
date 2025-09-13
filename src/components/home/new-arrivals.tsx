@@ -19,7 +19,8 @@ export function NewArrivals() {
                 const { data, error } = await supabase
                     .from('products')
                     .select('*')
-                    .eq('isNewArrival', true)
+                    .is('isNewArrival', true)
+                    .order('created_at', { ascending: false })
                     .limit(8);
 
                 if (error) throw error;
