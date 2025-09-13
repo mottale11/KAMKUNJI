@@ -21,7 +21,7 @@ export default function NewArrivalsPage() {
         const { data, error } = await supabase
             .from('products')
             .select('*')
-            .is('isNewArrival', true)
+            .eq('isNewArrival', true)
             .order('created_at', { ascending: false })
             .limit(12);
             

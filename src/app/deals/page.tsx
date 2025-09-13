@@ -21,7 +21,7 @@ export default function DealsPage() {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .is('isFlashDeal', true)
+          .eq('isFlashDeal', true)
           .order('created_at', { ascending: false })
           .limit(12);
         
