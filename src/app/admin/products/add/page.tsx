@@ -100,7 +100,7 @@ export default function AddProductPage() {
         if (file && file.type.startsWith('image/')) {
             handleImageChange(file);
         }
-    }, [setValue]);
+    }, []);
 
     const onDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();

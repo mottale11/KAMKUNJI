@@ -6,12 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function HeroSection() {
-    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { imageUrl: 'https://storage.googleapis.com/aip-dev-images-public-test/fx-assets/images/delivery.jpeg', imageHint: 'fast delivery' };
+    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { image_url: 'https://storage.googleapis.com/aip-dev-images-public-test/fx-assets/images/delivery.jpeg', imageHint: 'fast delivery' };
 
     return (
         <section className="relative h-[60vh] md:h-[70vh] w-full text-white">
             <Image 
-                src={heroImage.imageUrl}
+                src={heroImage.image_url}
                 alt="E-commerce hero banner"
                 fill
                 className="object-cover"

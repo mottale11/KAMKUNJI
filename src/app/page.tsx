@@ -6,18 +6,62 @@ import { FeaturedCategories } from '@/components/home/featured-categories';
 import { FlashDeals } from '@/components/home/flash-deals';
 import { NewArrivals } from '@/components/home/new-arrivals';
 import { Newsletter } from '@/components/home/newsletter';
-import { FlashDealsServer } from '@/components/home/flash-deals-server';
-import { NewArrivalsServer } from '@/components/home/new-arrivals-server';
+import { supabase } from '@/lib/supabase';
+import type { Product } from '@/lib/types';
 
-export default function Home() {
+async function getFlashDeals() {
+    try {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('is_flash_deal', true)
+            .order('created_at', { ascending: false })
+            .limit(8);
+
+        if (error) {
+          console.error("Error fetching flash deals:", error);
+          return [];
+        };
+        return data as Product[];
+    } catch (error) {
+        console.error("Error fetching flash deals:", error);
+        return [];
+    }
+}
+
+async function getNewArrivals() {
+    try {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('is_new_arrival', true)
+            .order('created_at', { ascending: false })
+            .limit(8);
+
+        if (error) {
+          console.error("Error fetching new arrivals:", error);
+          return [];
+        }
+        return data as Product[];
+    } catch (error) {
+        console.error("Error fetching new arrivals:", error);
+        return [];
+    }
+}
+
+
+export default async function Home() {
+  const flashDeals = await getFlashDeals();
+  const newArrivals = await getNewArrivals();
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
-      <main className="flex-1 pl-8 pr-4">
+      <main className="flex-1">
         <HeroSection />
         <FeaturedCategories />
-        <FlashDealsServer />
-        <NewArrivalsServer />
+        <FlashDeals products={flashDeals} />
+        <NewArrivals products={newArrivals} />
         <Newsletter />
       </main>
       <Footer />

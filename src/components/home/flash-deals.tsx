@@ -11,8 +11,13 @@ export function FlashDeals({ products }: { products: Product[] }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if(products) {
+      // Products are now passed as props, so we can check if they exist
+      if(products && products.length > 0) {
         setLoading(false);
+      } else {
+        // Handle case where no products are passed, maybe show loading for a bit then "no deals"
+        const timer = setTimeout(() => setLoading(false), 1000); // Wait 1s
+        return () => clearTimeout(timer);
       }
     }, [products])
 
