@@ -27,9 +27,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   useEffect(() => {
     const getCategory = async () => {
-        const { data } = await supabase.from('categories').select('name').eq('id', product.category_id).single();
-        if (data) {
-            setCategoryName(data.name);
+        if (product.category_id) {
+            const { data } = await supabase.from('categories').select('name').eq('id', product.category_id).single();
+            if (data) {
+                setCategoryName(data.name);
+            }
         }
     }
     getCategory();
@@ -66,10 +68,10 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
           <div className="p-4 space-y-2 flex flex-col flex-grow">
-            <p className="text-sm text-muted-foreground">{categoryName}</p>
+            <p className="text-sm text-muted-foreground">{categoryName || 'Uncategorized'}</p>
             <h3 className="font-semibold text-base h-12 leading-tight line-clamp-2">{product.title}</h3>
             <div className="flex items-center gap-2">
-                <StarRating rating={product.rating} size={14} />
+                <StarRating rating={product.rating || 0} size={14} />
                 <span className="text-xs text-muted-foreground">({product.review_count})</span>
             </div>
             <div className="flex items-baseline gap-2 font-headline mt-auto pt-2">
@@ -90,5 +92,3 @@ export function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
-
-    

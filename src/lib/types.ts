@@ -6,7 +6,7 @@ export interface Product {
   description: string;
   price: number;
   original_price?: number | null;
-  category_id: string;
+  category_id?: string;
   image_url: string;
   image_hint: string;
   rating: number;
@@ -57,5 +57,3 @@ export interface Order {
   };
   created_at: string;
 }
-
-
