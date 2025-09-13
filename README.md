@@ -6,7 +6,37 @@ This is a NextJS starter in Firebase Studio.
 
 These are critical steps to ensure your application can read and write data correctly.
 
-### Step 1: Configure Firebase Storage CORS
+### Step 1: Run the Database Schema SQL
+
+To set up your database tables correctly, you need to run the SQL script provided in the project.
+
+1.  Go to your Supabase project dashboard.
+2.  Navigate to the **SQL Editor** in the sidebar.
+3.  Open the `supabase_schema.sql` file from this project, copy its entire content.
+4.  Paste the SQL into the editor.
+5.  Click **Run**. This will create all the necessary tables (`products`, `categories`, `orders`, `customers`).
+
+### Step 2: Create Supabase Storage Bucket
+
+For product images to be uploaded and displayed, you need to create a storage bucket in Supabase.
+
+1.  In your Supabase project dashboard, go to the **Storage** section (click the storage icon in the left sidebar).
+2.  Click **Create bucket**.
+3.  Name the bucket `product-images`.
+4.  Ensure the **Public bucket** option is **checked**.
+5.  Click **Create bucket**.
+
+After creating the bucket, you need to set access policies to allow your app to upload files:
+
+1.  Click on the newly created `product-images` bucket to open its policies.
+2.  Click **Edit policy**.
+3.  A modal will appear. Select the **"Give users access to all files"** template.
+4.  This will generate a policy. Make sure `INSERT` is checked under "Allowed operations".
+5.  Click **Review** and then **Save**.
+
+This configuration allows your application to upload images to this bucket and for anyone to view them, which is necessary for displaying product images in your store.
+
+### Step 3: Configure Firebase Storage CORS
 
 To allow your website to upload images when you add a new product, you must configure Cross-Origin Resource Sharing (CORS) for your Firebase Storage bucket.
 
@@ -32,14 +62,14 @@ To allow your website to upload images when you add a new product, you must conf
     ```
     (Note: If you deploy to a different domain in the future, you will need to update `cors.json` with the new URL and run this command again.)
 
-### Step 2: Update Firestore Security Rules
+### Step 4: Update Firestore Security Rules
 
 1.  Copy the content of the `firestore.rules` file in the root of this project.
 2.  Go to your **Firebase Console** -> **Firestore Database** -> **Rules** tab.
 3.  Paste the new rules into the editor, replacing the existing ones.
 4.  Click **Publish**.
 
-### Step 3: Create Composite Indexes
+### Step 5: Create Composite Indexes
 
 After you publish the rules and run the application, your browser's developer console will report "Missing or insufficient permissions" errors for queries that require a composite index.
 
