@@ -11,8 +11,7 @@ import { MoreVertical, Truck, PackageCheck, Ban, RotateCcw } from "lucide-react"
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, doc, updateDoc, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import type { Order } from "@/lib/types";
@@ -37,17 +36,19 @@ export default function AccountOrdersPage() {
         const fetchOrders = async () => {
             setLoading(true);
             try {
-                const q = query(
-                    collection(db, "orders"), 
-                    where("customer.email", "==", user.email),
-                    orderBy("date", "desc")
-                );
-                const querySnapshot = await getDocs(q);
-                const userOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('customer->>email', user.email)
+                    .order('date', { ascending: false });
+
+                if (error) throw error;
+                
+                const userOrders = data.map(order => ({ ...order, id: String(order.id) })) as Order[];
                 setOrders(userOrders);
-            } catch(e) {
+            } catch(e: any) {
                 console.error("Error fetching user orders: ", e);
-                toast({ variant: 'destructive', title: "Error", description: "Could not fetch your orders."})
+                toast({ variant: 'destructive', title: "Error", description: e.message || "Could not fetch your orders."})
             } finally {
                 setLoading(false);
             }
@@ -57,9 +58,14 @@ export default function AccountOrdersPage() {
     }, [user, toast]);
 
      const handleCancelOrder = async (orderId: string) => {
-        const orderRef = doc(db, "orders", orderId);
         try {
-            await updateDoc(orderRef, { status: 'Canceled' });
+            const { error } = await supabase
+                .from('orders')
+                .update({ status: 'Canceled' })
+                .eq('id', orderId);
+
+            if (error) throw error;
+
             setOrders(prevOrders => 
                 prevOrders.map(order => 
                     order.id === orderId ? { ...order, status: 'Canceled' } : order
@@ -69,12 +75,12 @@ export default function AccountOrdersPage() {
                 title: "Order Canceled",
                 description: `Your order #${orderId.slice(0,7)} has been canceled.`,
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error canceling order: ", error);
             toast({
                 variant: "destructive",
                 title: "Update failed",
-                description: "Failed to cancel your order.",
+                description: error.message || "Failed to cancel your order.",
             });
         }
     };
@@ -99,7 +105,7 @@ export default function AccountOrdersPage() {
                         <Card key={order.id}>
                             <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
                                 <div className="grid gap-1.5">
-                                    <CardTitle>Order #{order.id.slice(0, 7)}</CardTitle>
+                                    <CardTitle>Order #{String(order.id).slice(0, 7)}</CardTitle>
                                     <CardDescription>Date: {new Date(order.date).toLocaleDateString()}</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -140,7 +146,7 @@ export default function AccountOrdersPage() {
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                            {order.items.map(item => (
+                            {(order.items as any[]).map(item => (
                                     <div key={item.productId} className="flex items-center gap-4">
                                         <div className="flex-1">
                                             <Link href={`/product/${item.productId}`} className="font-semibold hover:underline">{item.title}</Link>
@@ -161,4 +167,3 @@ export default function AccountOrdersPage() {
         </div>
     );
 }
-    

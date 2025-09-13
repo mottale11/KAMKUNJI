@@ -5,8 +5,7 @@ import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
@@ -17,10 +16,14 @@ export function NewArrivals() {
      useEffect(() => {
         const fetchNewArrivals = async () => {
             try {
-                const q = query(collection(db, "products"), where("isNewArrival", "==", true), limit(8));
-                const querySnapshot = await getDocs(q);
-                const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-                setNewArrivals(productsData);
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('isNewArrival', true)
+                    .limit(8);
+
+                if (error) throw error;
+                setNewArrivals(data as Product[]);
             } catch (error) {
                 console.error("Error fetching new arrivals:", error);
             } finally {

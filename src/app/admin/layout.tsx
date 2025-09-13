@@ -13,29 +13,23 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { isAdmin, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
 
-    // If we are not on the login page and the user is not the admin, redirect them.
-    if (pathname !== '/admin/login' && (!user || user.email !== 'kamkunjin@gmail.com')) {
+    if (pathname !== '/admin/login' && !isAdmin) {
       router.push('/admin/login');
     }
-  }, [user, loading, router, pathname]);
+  }, [isAdmin, loading, router, pathname]);
 
-  // The login page handles its own UI and doesn't need the admin sidebar.
-  // We return its children directly.
   if (pathname === '/admin/login') {
       return <>{children}</>;
   }
 
-
-  // If still loading or the user is not the authorized admin, show a loader.
-  // This prevents the admin dashboard from flashing before the redirect happens.
-  if (loading || !user || user.email !== 'kamkunjin@gmail.com') {
+  if (loading || !isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -43,8 +37,6 @@ export default function AdminLayout({
     );
   }
 
-
-  // If the user is the admin, show the full admin dashboard layout.
   return (
     <SidebarProvider>
       <Sidebar>

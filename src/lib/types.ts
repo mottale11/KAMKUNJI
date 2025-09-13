@@ -1,5 +1,4 @@
 
-
 export interface Product {
   id: string;
   title: string;
@@ -45,7 +44,5 @@ export interface Order {
     city: string;
     county: string;
   };
-  createdAt: any;
+  created_at: any;
 }
-
-    

@@ -8,8 +8,7 @@ import { MoreHorizontal, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 
 interface Customer {
     id: string;
@@ -28,9 +27,11 @@ export default function CustomersPage() {
             setLoading(true);
             try {
                 // Fetch all orders to calculate spending
-                const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
-                const ordersSnapshot = await getDocs(ordersQuery);
-                const orders = ordersSnapshot.docs.map(doc => doc.data());
+                const { data: orders, error: ordersError } = await supabase
+                    .from('orders')
+                    .select('customer, total');
+
+                if (ordersError) throw ordersError;
 
                 const spendingData: { [email: string]: number } = {};
                 orders.forEach(order => {
@@ -40,20 +41,24 @@ export default function CustomersPage() {
                 });
 
                 // Fetch all customers from the 'customers' collection
-                const customersQuery = query(collection(db, "customers"), orderBy("createdAt", "desc"));
-                const customersSnapshot = await getDocs(customersQuery);
-                const customerList = customersSnapshot.docs.map(doc => {
-                    const data = doc.data();
+                const { data: customerList, error: customersError } = await supabase
+                    .from('customers')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if(customersError) throw customersError;
+
+                const customerData = customerList.map(customer => {
                     return {
-                        id: doc.id,
-                        name: data.name,
-                        email: data.email,
-                        phone: data.phone,
-                        totalSpent: spendingData[data.email] || 0,
+                        id: customer.id,
+                        name: customer.name,
+                        email: customer.email,
+                        phone: customer.phone,
+                        totalSpent: spendingData[customer.email] || 0,
                     };
                 });
                 
-                setCustomers(customerList);
+                setCustomers(customerData);
             } catch (error) {
                 console.error("Error fetching customer data:", error);
             } finally {

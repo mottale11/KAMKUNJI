@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { MapPin, User, Mail, Phone, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { doc, getDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 
 interface OrderDetailsDialogProps {
   order: Order;
@@ -39,9 +38,12 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                      return;
                 }
 
-                const productsQuery = query(collection(db, "products"), where("__name__", "in", productIds));
-                const productsSnapshot = await getDocs(productsQuery);
-                const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+                const { data: productsData, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .in('id', productIds);
+
+                if (error) throw error;
 
                 const productsWithQuantity = order.items.map(item => {
                     const product = productsData.find(p => p.id === item.productId);
@@ -67,7 +69,7 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                 <DialogHeader>
                     <DialogTitle>Order Details</DialogTitle>
                     <DialogDescription>
-                        Order #{order.id.slice(0, 7)} - {new Date(order.date).toLocaleDateString()}
+                        Order #{String(order.id).slice(0, 7)} - {new Date(order.date).toLocaleDateString()}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6">
@@ -145,4 +147,3 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
         </Dialog>
     );
 }
-

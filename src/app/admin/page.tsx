@@ -21,8 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
-import { collection, getDocs, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Order } from "@/lib/types";
 
 interface DashboardStats {
@@ -43,19 +42,19 @@ interface DashboardStats {
         const fetchDashboardData = async () => {
             setLoading(true);
             try {
-                const ordersSnapshot = await getDocs(collection(db, "orders"));
-                const orders = ordersSnapshot.docs.map(doc => doc.data() as Order);
+                const { data: orders, error } = await supabase.from('orders').select('date, total, customer');
+                if (error) throw error;
                 
                 const now = new Date();
                 const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
 
                 const currentMonthOrders = orders.filter(o => {
-                    const orderDate = (o.date as unknown as Timestamp).toDate();
+                    const orderDate = new Date(o.date);
                     return orderDate > oneMonthAgo;
                 });
 
                 const previousMonthOrders = orders.filter(o => {
-                    const orderDate = (o.date as unknown as Timestamp).toDate();
+                    const orderDate = new Date(o.date);
                     const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
                     return orderDate > twoMonthsAgo && orderDate <= oneMonthAgo;
                 });
@@ -230,5 +229,3 @@ interface DashboardStats {
         </Tabs>
     )
   }
-
-    

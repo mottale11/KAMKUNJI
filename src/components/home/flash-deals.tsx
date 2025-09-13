@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { Zap } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/product-card";
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import type { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
@@ -17,10 +16,14 @@ export function FlashDeals() {
      useEffect(() => {
         const fetchFlashDeals = async () => {
             try {
-                const q = query(collection(db, "products"), where("isFlashDeal", "==", true), limit(8));
-                const querySnapshot = await getDocs(q);
-                const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-                setFlashDeals(productsData);
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('isFlashDeal', true)
+                    .limit(8);
+
+                if (error) throw error;
+                setFlashDeals(data as Product[]);
             } catch (error) {
                 console.error("Error fetching flash deals:", error);
             } finally {

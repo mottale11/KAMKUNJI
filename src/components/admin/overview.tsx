@@ -2,8 +2,7 @@
 "use client"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import { collection, getDocs, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Order } from "@/lib/types";
 import { useEffect, useState } from "react";
 
@@ -17,8 +16,12 @@ export function Overview() {
 
     useEffect(() => {
         const fetchSalesData = async () => {
-            const ordersSnapshot = await getDocs(collection(db, "orders"));
-            const orders = ordersSnapshot.docs.map(doc => doc.data() as Order);
+            const { data: orders, error } = await supabase.from('orders').select('date, total');
+
+            if (error || !orders) {
+                console.error('Error fetching sales data', error);
+                return;
+            }
 
             const monthlySales: { [key: string]: number } = {
                 "Jan": 0, "Feb": 0, "Mar": 0, "Apr": 0, "May": 0, "Jun": 0,
@@ -26,7 +29,7 @@ export function Overview() {
             };
 
             orders.forEach(order => {
-                const orderDate = (order.date as unknown as Timestamp).toDate();
+                const orderDate = new Date(order.date);
                 const monthName = orderDate.toLocaleString('default', { month: 'short' });
                 monthlySales[monthName] += order.total;
             });
@@ -60,5 +63,3 @@ export function Overview() {
     </ResponsiveContainer>
   )
 }
-
-    

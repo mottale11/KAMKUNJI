@@ -10,8 +10,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -35,11 +34,14 @@ export default function ProductsPage() {
 
     const fetchProducts = async () => {
         try {
-            const productsQuery = query(collection(db, "products"), orderBy("title", "asc"));
-            const querySnapshot = await getDocs(productsQuery);
-            const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-            setProducts(productsData);
-        } catch (err) {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .order('title', { ascending: true });
+
+            if (error) throw error;
+            setProducts(data as Product[]);
+        } catch (err: any) {
             setError("Failed to fetch products. Please try again.");
             console.error(err);
         } finally {
@@ -55,17 +57,23 @@ export default function ProductsPage() {
         if (!productToDelete) return;
         setIsDeleting(true);
         try {
-            await deleteDoc(doc(db, "products", productToDelete.id));
+            const { error } = await supabase
+                .from('products')
+                .delete()
+                .eq('id', productToDelete.id);
+            
+            if (error) throw error;
+
             setProducts(products.filter(p => p.id !== productToDelete.id));
             toast({
                 title: "Product Deleted",
                 description: `"${productToDelete.title}" has been successfully deleted.`,
             });
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to delete product. Please try again.",
+                description: error.message || "Failed to delete product. Please try again.",
             });
             console.error("Error deleting product: ", error);
         } finally {
@@ -190,4 +198,3 @@ export default function ProductsPage() {
         </>
     );
 }
-

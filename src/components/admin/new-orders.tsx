@@ -1,5 +1,4 @@
 
-
 'use client'
 import {
     Avatar,
@@ -8,8 +7,7 @@ import {
   } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import type { Order } from "@/lib/types";
   
@@ -22,14 +20,15 @@ import type { Order } from "@/lib/types";
         const fetchNewOrders = async () => {
             setLoading(true);
             try {
-                const q = query(
-                    collection(db, "orders"), 
-                    where("status", "==", "Pending"), 
-                    orderBy("date", "desc"),
-                    limit(5)
-                );
-                const querySnapshot = await getDocs(q);
-                const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('status', 'Pending')
+                    .order('date', { ascending: false })
+                    .limit(5);
+
+                if (error) throw error;
+                const ordersData = data.map(o => ({...o, id: String(o.id)})) as Order[];
                 setNewOrders(ordersData);
             } catch (error) {
                 console.error("Error fetching new orders: ", error);

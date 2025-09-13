@@ -10,8 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { CircleUserRound, LogOut, Package } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
-import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/context/cart-context';
 
@@ -33,10 +32,11 @@ export function Header() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Logout Failed', description: 'Could not log you out. Please try again.' });
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Logout Failed', description: error.message || 'Could not log you out. Please try again.' });
     }
   };
   
@@ -112,7 +112,7 @@ export function Header() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Hi, {user.displayName?.split(' ')[0] || 'User'}</DropdownMenuLabel>
+                          <DropdownMenuLabel>Hi, {user.user_metadata.full_name?.split(' ')[0] || 'User'}</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem asChild>
                             <Link href="/account/profile" className="flex items-center gap-2 cursor-pointer">
@@ -155,5 +155,3 @@ export function Header() {
     </header>
   );
 }
-
-    

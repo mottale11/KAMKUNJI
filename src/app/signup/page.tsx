@@ -1,10 +1,10 @@
+
 'use client';
 
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
@@ -31,14 +31,21 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      await updateProfile(user, {
-        displayName: `${firstName} ${lastName}`,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: `${firstName} ${lastName}`,
+          }
+        }
       });
+      
+      if (error) throw error;
+      
       toast({
         title: "Account Created!",
-        description: "You have successfully signed up.",
+        description: "You have successfully signed up. Please check your email to verify your account.",
       });
       router.push('/account');
     } catch (error: any) {

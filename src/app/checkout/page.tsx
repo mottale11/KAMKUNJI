@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -19,8 +18,7 @@ import { initiateMpesaPayment } from '@/ai/flows/mpesa-payment';
 import { useCart } from '@/context/cart-context';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 
 
 const shippingOptions = {
@@ -52,7 +50,7 @@ export default function CheckoutPage() {
 
     useEffect(() => {
         if (!user) return;
-        setName(user.displayName || '');
+        setName(user.user_metadata.full_name || '');
     }, [user])
 
 
@@ -95,7 +93,7 @@ export default function CheckoutPage() {
                     try {
                         const orderData = {
                             customer: {
-                                name: user.displayName || name,
+                                name: user.user_metadata.full_name || name,
                                 email: user.email,
                             },
                             date: new Date().toISOString(),
@@ -114,10 +112,11 @@ export default function CheckoutPage() {
                                 city,
                                 county,
                             },
-                            createdAt: serverTimestamp()
                         };
 
-                        await addDoc(collection(db, "orders"), orderData);
+                        const { error } = await supabase.from('orders').insert(orderData);
+
+                        if (error) throw error;
                         
                         toast({
                             title: 'Order Placed!',
@@ -127,11 +126,11 @@ export default function CheckoutPage() {
                         clearCart();
                         router.push('/account/orders');
 
-                    } catch(e) {
+                    } catch(e: any) {
                          toast({
                             variant: 'destructive',
                             title: 'Order Creation Failed',
-                            description: 'We could not save your order. Please contact support.',
+                            description: e.message || 'We could not save your order. Please contact support.',
                         });
                     } finally {
                         setIsProcessing(false);

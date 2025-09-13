@@ -7,8 +7,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Card } from '@/components/ui/card';
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,9 +18,12 @@ export default function CategoriesPage() {
   useEffect(() => {
     const fetchCategories = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, "categories"));
-            const categoriesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
-            setCategories(categoriesData);
+            const { data, error } = await supabase
+                .from('categories')
+                .select('*');
+
+            if (error) throw error;
+            setCategories(data as Category[]);
         } catch (error) {
             console.error("Error fetching categories:", error);
         } finally {

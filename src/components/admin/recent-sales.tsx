@@ -5,8 +5,7 @@ import {
     AvatarFallback,
     AvatarImage,
   } from "@/components/ui/avatar"
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import type { Order } from "@/lib/types";
   
@@ -18,9 +17,14 @@ import type { Order } from "@/lib/types";
         const fetchRecentSales = async () => {
             setLoading(true);
             try {
-                const q = query(collection(db, "orders"), orderBy("date", "desc"), limit(5));
-                const querySnapshot = await getDocs(q);
-                const salesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('date', { ascending: false })
+                    .limit(5);
+                
+                if (error) throw error;
+                const salesData = data.map(o => ({...o, id: String(o.id)})) as Order[];
                 setRecentSales(salesData);
             } catch (error) {
                 console.error("Error fetching recent sales: ", error);

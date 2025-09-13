@@ -6,8 +6,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { ProductCard } from '@/components/product-card';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,10 +18,14 @@ export default function NewArrivalsPage() {
     const fetchNewArrivals = async () => {
       setLoading(true);
       try {
-        const q = query(collection(db, "products"), where("isNewArrival", "==", true), limit(12));
-        const querySnapshot = await getDocs(q);
-        const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-        setNewArrivals(productsData);
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('isNewArrival', true)
+            .limit(12);
+            
+        if (error) throw error;
+        setNewArrivals(data as Product[]);
       } catch (error) {
         console.error("Error fetching new arrivals:", error);
       } finally {

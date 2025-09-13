@@ -5,8 +5,7 @@ import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Category } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
@@ -17,9 +16,13 @@ export function FeaturedCategories() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const querySnapshot = await getDocs(collection(db, "categories"));
-                const categoriesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
-                setCategories(categoriesData);
+                const { data, error } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .limit(6);
+                
+                if (error) throw error;
+                setCategories(data as Category[]);
             } catch (error) {
                 console.error("Error fetching categories:", error);
             } finally {
@@ -50,7 +53,7 @@ export function FeaturedCategories() {
                             </div>
                         ))
                     ) : (
-                        categories.slice(0, 6).map((category) => (
+                        categories.map((category) => (
                             <Link key={category.id} href={`/category/${category.id}`} className="group block">
                                 <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                     <div className="aspect-square relative">

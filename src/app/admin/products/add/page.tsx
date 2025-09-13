@@ -17,9 +17,7 @@ import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 const productSchema = z.object({
@@ -95,38 +93,51 @@ export default function AddProductPage() {
     const onSubmit = async (data: ProductFormValues) => {
         setIsSubmitting(true);
         try {
-            // 1. Upload image to Firebase Storage
-            const imageRef = ref(storage, `products/${Date.now()}_${data.image.name}`);
-            await uploadBytes(imageRef, data.image);
-            const imageUrl = await getDownloadURL(imageRef);
+            // 1. Upload image to Supabase Storage
+            const filePath = `products/${Date.now()}_${data.image.name}`;
+            const { error: uploadError } = await supabase.storage
+                .from('product-images')
+                .upload(filePath, data.image);
 
-            // 2. Add product data to Firestore
-            await addDoc(collection(db, "products"), {
-                title: data.name,
-                description: data.description,
-                price: data.price,
-                originalPrice: data.originalPrice || null,
-                category: data.category,
-                stock: data.stock,
-                imageUrl: imageUrl,
-                isNewArrival: data.isNewArrival,
-                isFlashDeal: data.isFlashDeal,
-                rating: Math.floor(Math.random() * 2) + 3.5, // Mock rating
-                reviewCount: Math.floor(Math.random() * 100), // Mock review count,
-                imageHint: 'product image',
-            });
+            if (uploadError) throw uploadError;
+
+            // 2. Get public URL for the uploaded image
+            const { data: { publicUrl } } = supabase.storage
+                .from('product-images')
+                .getPublicUrl(filePath);
+
+            // 3. Add product data to Supabase database
+            const { error: insertError } = await supabase
+                .from('products')
+                .insert({
+                    title: data.name,
+                    description: data.description,
+                    price: data.price,
+                    originalPrice: data.originalPrice,
+                    category: data.category,
+                    stock: data.stock,
+                    imageUrl: publicUrl,
+                    isNewArrival: data.isNewArrival,
+                    isFlashDeal: data.isFlashDeal,
+                    rating: Math.floor(Math.random() * 2) + 3.5, // Mock rating
+                    reviewCount: Math.floor(Math.random() * 100), // Mock review count,
+                    imageHint: 'product image',
+                });
+
+            if (insertError) throw insertError;
+
 
             toast({
                 title: "Product Added!",
                 description: "The new product has been successfully added to your store.",
             });
             router.push('/admin/products');
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error adding product:", error);
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to add product. Please try again.",
+                description: error.message || "Failed to add product. Please try again.",
             });
         } finally {
             setIsSubmitting(false);
@@ -283,5 +294,3 @@ export default function AddProductPage() {
         </>
     );
 }
-
-    

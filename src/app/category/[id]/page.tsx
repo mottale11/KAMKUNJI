@@ -8,8 +8,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { ProductCard } from '@/components/product-card';
-import { collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { Product, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -23,22 +22,28 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
       setLoading(true);
       try {
         // Fetch category details
-        const categoryRef = doc(db, "categories", params.id);
-        const categorySnap = await getDoc(categoryRef);
+        const { data: categoryData, error: categoryError } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('id', params.id)
+          .single();
 
-        if (!categorySnap.exists()) {
+        if (categoryError || !categoryData) {
           notFound();
           return;
         }
         
-        const categoryData = { id: categorySnap.id, ...categorySnap.data() } as Category;
-        setCategory(categoryData);
+        setCategory(categoryData as Category);
 
         // Fetch products for this category
-        const productsQuery = query(collection(db, "products"), where("category", "==", categoryData.name));
-        const productsSnapshot = await getDocs(productsQuery);
-        const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        setProducts(productsData);
+        const { data: productsData, error: productsError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('category', categoryData.name);
+        
+        if (productsError) throw productsError;
+
+        setProducts(productsData as Product[]);
 
       } catch (error) {
         console.error("Error fetching category data:", error);
@@ -106,4 +111,3 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-

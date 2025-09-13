@@ -1,5 +1,4 @@
 
-
 'use client'
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,8 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -36,24 +34,25 @@ export default function AddCustomerPage() {
     const onSubmit = async (data: CustomerFormValues) => {
         setIsSubmitting(true);
         try {
-            await addDoc(collection(db, "customers"), {
+            const { error } = await supabase.from('customers').insert({
                 name: `${data.firstName} ${data.lastName}`,
                 email: data.email,
                 phone: data.phone,
-                createdAt: new Date().toISOString(),
             });
+
+            if (error) throw error;
 
             toast({
                 title: "Customer Added",
                 description: "The new customer has been successfully added.",
             });
             router.push('/admin/customers');
-        } catch (error) {
+        } catch (error: any) {
              console.error("Error adding customer:", error);
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to add customer. Please try again.",
+                description: error.message || "Failed to add customer. Please try again.",
             });
         } finally {
             setIsSubmitting(false);
@@ -113,5 +112,3 @@ export default function AddCustomerPage() {
         </>
     );
 }
-
-    

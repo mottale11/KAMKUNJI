@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Package, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
-import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 const navItems = [
@@ -21,10 +20,11 @@ export function AccountNav() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       toast({ title: 'Logged Out', description: 'You have been successfully logged out.' });
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Logout Failed', description: 'Could not log you out. Please try again.' });
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Logout Failed', description: error.message || 'Could not log you out. Please try again.' });
     }
   };
 

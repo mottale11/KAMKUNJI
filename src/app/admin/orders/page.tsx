@@ -1,5 +1,4 @@
 
-
 'use client';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,7 @@ import { OrderDetailsDialog } from "@/components/admin/order-details-dialog";
 import type { Order } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { collection, getDocs, doc, updateDoc, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,16 +35,20 @@ export default function OrdersPage() {
      const fetchOrders = async () => {
         setLoading(true);
         try {
-            const ordersQuery = query(collection(db, "orders"), orderBy("date", "desc"));
-            const querySnapshot = await getDocs(ordersQuery);
-            const ordersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Order[];
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('date', { ascending: false });
+
+            if (error) throw error;
+            const ordersData = data.map(o => ({...o, id: String(o.id)})) as Order[];
             setOrders(ordersData);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching orders: ", error);
             toast({
                 variant: "destructive",
                 title: "Error fetching orders",
-                description: "Could not load orders from the database.",
+                description: error.message || "Could not load orders from the database.",
             });
         } finally {
             setLoading(false);
@@ -62,10 +64,15 @@ export default function OrdersPage() {
         
         const { order, type } = actionOrder;
         const newStatus = type === 'ship' ? 'Shipped' : 'Canceled';
-        const orderRef = doc(db, "orders", order.id);
 
         try {
-            await updateDoc(orderRef, { status: newStatus });
+            const { error } = await supabase
+                .from('orders')
+                .update({ status: newStatus })
+                .eq('id', order.id);
+
+            if (error) throw error;
+
             setOrders(prevOrders => 
                 prevOrders.map(o => 
                     o.id === order.id ? { ...o, status: newStatus } : o
@@ -73,14 +80,14 @@ export default function OrdersPage() {
             );
             toast({
                 title: "Order Updated",
-                description: `Order #${order.id.slice(0, 7)} has been marked as ${newStatus.toLowerCase()}.`,
+                description: `Order #${String(order.id).slice(0, 7)} has been marked as ${newStatus.toLowerCase()}.`,
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating order status: ", error);
             toast({
                 variant: "destructive",
                 title: "Update failed",
-                description: "Failed to update order status.",
+                description: error.message || "Failed to update order status.",
             });
         } finally {
             setActionOrder(null);
@@ -149,7 +156,7 @@ export default function OrdersPage() {
                             ) : orders.length > 0 ? (
                                 orders.map((order) => (
                                     <TableRow key={order.id}>
-                                        <TableCell className="font-medium">#{order.id.slice(0, 7)}</TableCell>
+                                        <TableCell className="font-medium">#{String(order.id).slice(0, 7)}</TableCell>
                                         <TableCell>
                                             <div className="font-medium">{order.customer.name}</div>
                                             <div className="text-sm text-muted-foreground hidden md:inline">{order.customer.email}</div>
@@ -238,5 +245,3 @@ export default function OrdersPage() {
         </>
     );
 }
-
-    

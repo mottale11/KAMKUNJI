@@ -3,11 +3,8 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import { useEffect, useState } from 'react';
-
-import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { mockCategories } from '@/lib/mock-data';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -56,39 +53,33 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     useEffect(() => {
         setProductUrl(`${window.location.protocol}//${window.location.host}/product/${params.id}`);
 
-        const getProduct = async (id: string) => {
-            const docRef = doc(db, "products", id);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                return { id: docSnap.id, ...docSnap.data() } as Product;
-            }
-            return null;
-        }
-
-        const getRelatedProducts = async (category: string, currentProductId: string) => {
-            const q = query(
-                collection(db, "products"),
-                where("category", "==", category),
-                limit(5)
-            );
-            const querySnapshot = await getDocs(q);
-            const products = querySnapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() } as Product))
-                .filter(p => p.id !== currentProductId);
-
-            return products.slice(0, 4);
-        }
-
         const fetchData = async () => {
             setLoading(true);
-            const productData = await getProduct(params.id);
-            if (productData) {
-                setProduct(productData);
-                const related = await getRelatedProducts(productData.category, productData.id);
-                setRelatedProducts(related);
-            } else {
+            
+            const { data: productData, error: productError } = await supabase
+                .from('products')
+                .select('*')
+                .eq('id', params.id)
+                .single();
+
+            if (productError || !productData) {
                 notFound();
+                return;
             }
+            
+            setProduct(productData as Product);
+
+            const { data: relatedData, error: relatedError } = await supabase
+                .from('products')
+                .select('*')
+                .eq('category', productData.category)
+                .neq('id', productData.id)
+                .limit(4);
+            
+            if (relatedData) {
+                setRelatedProducts(relatedData as Product[]);
+            }
+
             setLoading(false);
         };
 
@@ -243,5 +234,3 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-    
