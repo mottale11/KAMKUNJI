@@ -20,8 +20,8 @@ export function ProductCard({ product, categoryName }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
   
-  const hasDiscount = !!product.original_price && product.original_price > product.price;
-  const discountPercentage = hasDiscount ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
+  const hasDiscount = product.original_price && product.original_price > product.price;
+  const discountPercentage = hasDiscount ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100) : 0;
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -44,7 +44,7 @@ export function ProductCard({ product, categoryName }: ProductCardProps) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              data-ai-hint={product.image_hint}
+              data-ai-hint={product.title}
             />
             {hasDiscount && (
               <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground">
@@ -61,8 +61,8 @@ export function ProductCard({ product, categoryName }: ProductCardProps) {
             </div>
             <div className="flex items-baseline gap-2 font-headline mt-auto pt-2">
               <p className="text-lg font-bold text-primary">Ksh {product.price.toFixed(2)}</p>
-              {hasDiscount && product.original_price && (
-                <p className="text-sm text-muted-foreground line-through">Ksh {product.original_price.toFixed(2)}</p>
+              {hasDiscount && (
+                <p className="text-sm text-muted-foreground line-through">Ksh {product.original_price!.toFixed(2)}</p>
               )}
             </div>
           </div>

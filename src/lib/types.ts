@@ -9,7 +9,6 @@ export interface Product {
   category_id?: string | null;
   categoryName?: string;
   image_url: string;
-  image_hint: string;
   rating: number;
   review_count: number;
   stock: number;
@@ -22,7 +21,6 @@ export interface Category {
   id: string; // This is a UUID string
   name: string;
   image_url: string;
-  image_hint: string;
   created_at?: string;
 }
 

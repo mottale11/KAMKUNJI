@@ -75,7 +75,7 @@ export default function CategoriesPage() {
                                   fill
                                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                                   sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw"
-                                  data-ai-hint={category.image_hint}
+                                  data-ai-hint={category.name}
                               />
                           </div>
                           <div className="p-4 bg-card">

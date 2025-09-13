@@ -1,22 +1,21 @@
 
 import { Button } from "@/components/ui/button";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 export function HeroSection() {
-    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { image_url: 'https://picsum.photos/seed/hero/1920/1080', imageHint: 'fast delivery' };
+    const heroImageUrl = "https://picsum.photos/seed/hero/1920/1080";
 
     return (
         <section className="relative h-[60vh] md:h-[70vh] w-full text-white">
             <Image 
-                src={heroImage.image_url}
+                src={heroImageUrl}
                 alt="E-commerce hero banner"
                 fill
                 className="object-cover"
                 priority
-                data-ai-hint={heroImage.imageHint}
+                data-ai-hint="fast delivery"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"/>
             <div className="relative h-full flex flex-col justify-end items-start container pb-16 md:pb-24">

@@ -102,7 +102,7 @@ export function ProductPageClient({ product, category, relatedProducts }: Produc
                             className="object-cover rounded-lg"
                             sizes="(max-width: 768px) 100vw, 50vw"
                             priority
-                            data-ai-hint={product.image_hint}
+                            data-ai-hint={product.title}
                         />
                         {hasDiscount && (
                             <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground">
@@ -183,4 +183,3 @@ export function ProductPageClient({ product, category, relatedProducts }: Produc
         </div>
     );
 }
-

@@ -140,7 +140,6 @@ export default function AddProductPage() {
                     image_url: publicUrl,
                     is_new_arrival: data.is_new_arrival,
                     is_flash_deal: data.is_flash_deal,
-                    image_hint: 'product image',
                 });
 
             if (insertError) throw insertError;
