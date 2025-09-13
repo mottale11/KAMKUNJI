@@ -36,7 +36,17 @@ After creating the bucket, you need to set access policies to allow your app to 
 
 This configuration allows your application to upload images to this bucket and for anyone to view them, which is necessary for displaying product images in your store.
 
-### Step 3: Configure Firebase Storage CORS
+### Step 3: Configure Supabase Auth URL
+
+To ensure that email confirmation links and password resets work correctly, you need to set your website's URL in Supabase.
+
+1.  In your Supabase project dashboard, go to **Authentication** -> **URL Configuration**.
+2.  In the **Site URL** field, enter your production website's URL: `https://kamkunji-git-main-moses-mwais-projects.vercel.app`
+3.  Click **Save**.
+
+This will ensure all future authentication emails link back to your live site instead of `localhost`.
+
+### Step 4: Configure Firebase Storage CORS
 
 To allow your website to upload images when you add a new product, you must configure Cross-Origin Resource Sharing (CORS) for your Firebase Storage bucket.
 
@@ -62,14 +72,14 @@ To allow your website to upload images when you add a new product, you must conf
     ```
     (Note: If you deploy to a different domain in the future, you will need to update `cors.json` with the new URL and run this command again.)
 
-### Step 4: Update Firestore Security Rules
+### Step 5: Update Firestore Security Rules
 
 1.  Copy the content of the `firestore.rules` file in the root of this project.
 2.  Go to your **Firebase Console** -> **Firestore Database** -> **Rules** tab.
 3.  Paste the new rules into the editor, replacing the existing ones.
 4.  Click **Publish**.
 
-### Step 5: Create Composite Indexes
+### Step 6: Create Composite Indexes
 
 After you publish the rules and run the application, your browser's developer console will report "Missing or insufficient permissions" errors for queries that require a composite index.
 
