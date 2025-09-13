@@ -194,7 +194,7 @@ export default function CheckoutPage() {
                                     <Input placeholder="Address (e.g. Street, Building, Floor)" value={address} onChange={e => setAddress(e.target.value)} />
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         <Input placeholder="City / Town" value={city} onChange={e => setCity(e.target.value)} />
-                                        <Input placeholder="County" value={county} onChange_e => setCounty(e.target.value)} />
+                                        <Input placeholder="County" value={county} onChange={e => setCounty(e.target.value)} />
                                     </div>
                                 </CardContent>
                             </Card>
