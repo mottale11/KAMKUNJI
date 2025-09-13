@@ -1,42 +1,17 @@
 
 'use client';
-import { useState, useEffect } from 'react';
 import { Zap } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/product-card";
-import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-export function FlashDeals() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+interface FlashDealsProps {
+    products: (Product & { categoryName?: string })[];
+}
 
-    useEffect(() => {
-        const getFlashDeals = async () => {
-            setLoading(true);
-            try {
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .eq('is_flash_deal', true)
-                    .order('created_at', { ascending: false })
-                    .limit(8);
-
-                if (error) {
-                    console.error("Error fetching flash deals:", error);
-                } else {
-                    setProducts(data as Product[]);
-                }
-            } catch (error) {
-                console.error("Error fetching flash deals:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getFlashDeals();
-    }, []);
+export function FlashDeals({ products }: FlashDealsProps) {
+    const loading = products.length === 0;
 
     return (
         <section className="py-16 lg:py-24">
@@ -71,7 +46,7 @@ export function FlashDeals() {
                         <CarouselContent>
                             {products.map((product) => (
                                 <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/4">
-                                    <ProductCard product={product} />
+                                    <ProductCard product={product} categoryName={product.categoryName} />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>

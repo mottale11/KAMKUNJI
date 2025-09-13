@@ -1,43 +1,18 @@
 
 'use client'
-import { useState, useEffect } from 'react';
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { supabase } from '@/lib/supabase';
 import { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-export function NewArrivals() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+interface NewArrivalsProps {
+    products: (Product & { categoryName?: string })[];
+}
 
-    useEffect(() => {
-        const getNewArrivals = async () => {
-            setLoading(true);
-            try {
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .eq('is_new_arrival', true)
-                    .order('created_at', { ascending: false })
-                    .limit(8);
-
-                if (error) {
-                    console.error("Error fetching new arrivals:", error);
-                } else {
-                    setProducts(data as Product[]);
-                }
-            } catch (error) {
-                console.error("Error fetching new arrivals:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getNewArrivals();
-    }, []);
+export function NewArrivals({ products }: NewArrivalsProps) {
+    const loading = products.length === 0;
 
     return (
         <section className="py-16 lg:py-24 bg-card">
@@ -60,7 +35,7 @@ export function NewArrivals() {
                         ))
                     ) : products.length > 0 ? (
                         products.map((product) => (
-                            <ProductCard key={product.id} product={product} />
+                            <ProductCard key={product.id} product={product} categoryName={product.categoryName} />
                         ))
                     ) : (
                         <p className="col-span-full text-center text-muted-foreground">No new arrivals found.</p>

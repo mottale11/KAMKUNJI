@@ -1,37 +1,18 @@
 
 'use client'
-import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { Category } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-export function FeaturedCategories() {
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
+interface FeaturedCategoriesProps {
+    categories: Category[];
+}
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('categories')
-                    .select('*')
-                    .limit(6);
-                
-                if (error) throw error;
-                setCategories(data as Category[]);
-            } catch (error) {
-                console.error("Error fetching categories:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCategories();
-    }, []);
+export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
+    const loading = categories.length === 0;
 
     return (
         <section className="py-16 lg:py-24 bg-card">

@@ -10,33 +10,18 @@ import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/star-rating';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 interface ProductCardProps {
   product: Product;
+  categoryName?: string;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, categoryName }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const [categoryName, setCategoryName] = useState('');
   
-  const hasDiscount = product.original_price && product.original_price > product.price;
-  const discountPercentage = hasDiscount ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100) : 0;
-
-  useEffect(() => {
-    const getCategory = async () => {
-        if (product.category_id) {
-            const { data } = await supabase.from('categories').select('name').eq('id', product.category_id).single();
-            if (data) {
-                setCategoryName(data.name);
-            }
-        }
-    }
-    getCategory();
-  }, [product.category_id]);
-
+  const hasDiscount = !!product.original_price && product.original_price > product.price;
+  const discountPercentage = hasDiscount ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -76,8 +61,8 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
             <div className="flex items-baseline gap-2 font-headline mt-auto pt-2">
               <p className="text-lg font-bold text-primary">Ksh {product.price.toFixed(2)}</p>
-              {hasDiscount && (
-                <p className="text-sm text-muted-foreground line-through">Ksh {product.original_price!.toFixed(2)}</p>
+              {hasDiscount && product.original_price && (
+                <p className="text-sm text-muted-foreground line-through">Ksh {product.original_price.toFixed(2)}</p>
               )}
             </div>
           </div>
