@@ -10,8 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/star-rating';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
-import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   product: Product;

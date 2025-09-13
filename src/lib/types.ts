@@ -5,7 +5,7 @@ export interface Product {
   description: string;
   price: number;
   original_price?: number | null;
-  category: string;
+  category_id: string;
   image_url: string;
   rating: number;
   review_count: number;
@@ -13,8 +13,7 @@ export interface Product {
   is_new_arrival?: boolean;
   is_flash_deal?: boolean;
   created_at?: string;
-  category_id?: string;
-  categoryName?: string;
+  categoryName?: string; 
 }
 
 export interface Category {
