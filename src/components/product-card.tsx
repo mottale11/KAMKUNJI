@@ -10,13 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/star-rating';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   product: Product;
-  categoryName?: string;
 }
 
-export function ProductCard({ product, categoryName }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
   
@@ -44,7 +45,6 @@ export function ProductCard({ product, categoryName }: ProductCardProps) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              data-ai-hint={product.title}
             />
             {hasDiscount && (
               <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground">
@@ -53,7 +53,7 @@ export function ProductCard({ product, categoryName }: ProductCardProps) {
             )}
           </div>
           <div className="p-4 space-y-2 flex flex-col flex-grow">
-            <p className="text-sm text-muted-foreground">{categoryName || 'Uncategorized'}</p>
+            <p className="text-sm text-muted-foreground">{product.categoryName || 'Uncategorized'}</p>
             <h3 className="font-semibold text-base h-12 leading-tight line-clamp-2">{product.title}</h3>
             <div className="flex items-center gap-2">
                 <StarRating rating={product.rating || 0} size={14} />

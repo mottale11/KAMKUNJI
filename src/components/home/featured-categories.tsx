@@ -4,15 +4,36 @@ import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Category } from '@/lib/types';
+import { supabase } from "@/lib/supabase";
 import { Skeleton } from '../ui/skeleton';
 
-interface FeaturedCategoriesProps {
-    categories: Category[];
-}
+export function FeaturedCategories() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
 
-export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
-    const loading = categories.length === 0;
+     useEffect(() => {
+        const fetchCategories = async () => {
+            setLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .limit(6);
+                
+                if (error) throw error;
+                if (data) setCategories(data as Category[]);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
 
     return (
         <section className="py-16 lg:py-24 bg-card">
@@ -34,7 +55,7 @@ export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
                         ))
                     ) : categories.length > 0 ? (
                         categories.map((category) => (
-                            <Link key={category.id} href={`/category/${category.id}`} className="group block">
+                            <Link key={category.id} href={`/category/${category.name.toLowerCase()}`} className="group block">
                                 <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                     <div className="aspect-square relative">
                                         <Image
@@ -43,7 +64,6 @@ export function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
                                             fill
                                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                                             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw"
-                                            data-ai-hint={category.name}
                                         />
                                     </div>
                                     <div className="p-3 bg-background">

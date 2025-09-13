@@ -35,7 +35,7 @@ const productSchema = z.object({
       (a) => parseInt(z.string().parse(a), 10),
       z.number().int().min(0, "Stock can't be negative")
     ),
-    category_id: z.string().uuid("Category is required"),
+    category: z.string().min(1, "Category is required"),
     is_new_arrival: z.boolean().default(false),
     is_flash_deal: z.boolean().default(false),
     image: z.instanceof(File).refine(file => file.size > 0, "Product image is required"),
@@ -135,7 +135,7 @@ export default function AddProductPage() {
                     description: data.description,
                     price: data.price,
                     original_price: data.original_price,
-                    category_id: data.category_id,
+                    category: data.category,
                     stock: data.stock,
                     image_url: publicUrl,
                     is_new_arrival: data.is_new_arrival,
@@ -259,24 +259,24 @@ export default function AddProductPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="category_id">Category</Label>
+                                    <Label htmlFor="category">Category</Label>
                                     <Controller
-                                        name="category_id"
+                                        name="category"
                                         control={control}
                                         render={({ field }) => (
                                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCategories}>
-                                                <SelectTrigger id="category_id">
+                                                <SelectTrigger id="category">
                                                     <SelectValue placeholder={loadingCategories ? "Loading categories..." : "Select a category"} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {categories.map(cat => (
-                                                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                         )}
                                     />
-                                    {errors.category_id && <p className="text-sm text-destructive">{errors.category_id.message}</p>}
+                                    {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Controller

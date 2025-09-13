@@ -7,7 +7,7 @@ import type { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
 interface FlashDealsProps {
-    products: (Product & { categoryName?: string })[];
+    products: Product[];
 }
 
 export function FlashDeals({ products }: FlashDealsProps) {
@@ -46,7 +46,7 @@ export function FlashDeals({ products }: FlashDealsProps) {
                         <CarouselContent>
                             {products.map((product) => (
                                 <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/4">
-                                    <ProductCard product={product} categoryName={product.categoryName} />
+                                    <ProductCard product={product} />
                                 </CarouselItem>
                             ))}
                         </CarouselContent>

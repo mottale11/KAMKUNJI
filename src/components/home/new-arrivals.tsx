@@ -8,7 +8,7 @@ import { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
 interface NewArrivalsProps {
-    products: (Product & { categoryName?: string })[];
+    products: Product[];
 }
 
 export function NewArrivals({ products }: NewArrivalsProps) {
@@ -35,7 +35,7 @@ export function NewArrivals({ products }: NewArrivalsProps) {
                         ))
                     ) : products.length > 0 ? (
                         products.map((product) => (
-                            <ProductCard key={product.id} product={product} categoryName={product.categoryName} />
+                            <ProductCard key={product.id} product={product} />
                         ))
                     ) : (
                         <p className="col-span-full text-center text-muted-foreground">No new arrivals found.</p>
