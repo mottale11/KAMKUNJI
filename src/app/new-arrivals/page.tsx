@@ -9,31 +9,34 @@ import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
+async function fetchNewArrivals() {
+  const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_new_arrival', true)
+      .order('created_at', { ascending: false })
+      .limit(12);
+      
+  if (error) {
+    console.error("Error fetching new arrivals:", error);
+    return [];
+  }
+  return data as Product[];
+}
+
 export default function NewArrivalsPage() {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNewArrivals = async () => {
+    const getNewArrivals = async () => {
       setLoading(true);
-      try {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('is_new_arrival', true)
-            .order('created_at', { ascending: false })
-            .limit(12);
-            
-        if (error) throw error;
-        setNewArrivals(data as Product[]);
-      } catch (error) {
-        console.error("Error fetching new arrivals:", error);
-      } finally {
-        setLoading(false);
-      }
+      const fetchedArrivals = await fetchNewArrivals();
+      setNewArrivals(fetchedArrivals);
+      setLoading(false);
     };
 
-    fetchNewArrivals();
+    getNewArrivals();
   }, []);
 
   return (

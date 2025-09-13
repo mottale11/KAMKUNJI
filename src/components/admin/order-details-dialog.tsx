@@ -23,7 +23,7 @@ interface OrderItem {
     quantity: number;
     price: number;
     title: string;
-    imageUrl?: string;
+    image_url?: string;
 }
 
 export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDialogProps) {
@@ -40,20 +40,20 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                     order.items.map(async (item) => {
                         const { data: productData, error } = await supabase
                             .from('products')
-                            .select('imageUrl')
+                            .select('image_url')
                             .eq('id', item.productId)
                             .single();
                         
                         return {
                             ...item,
-                            imageUrl: productData?.imageUrl || 'https://placehold.co/100x100'
+                            image_url: productData?.image_url || 'https://placehold.co/100x100'
                         };
                     })
                 );
                 setOrderItems(itemsWithDetails);
             } catch (error) {
                 console.error("Error fetching product details for order:", error);
-                 setOrderItems(order.items.map(item => ({...item, imageUrl: 'https://placehold.co/100x100'})));
+                 setOrderItems(order.items.map(item => ({...item, image_url: 'https://placehold.co/100x100'})));
             } finally {
                 setLoading(false);
             }
@@ -85,7 +85,7 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                                 {orderItems.map(item => (
                                     <div key={item.productId} className="flex items-center gap-4">
                                         <div className="relative w-16 h-16 rounded-md overflow-hidden border">
-                                            <Image src={item.imageUrl || ''} alt={item.title} fill className="object-cover" />
+                                            <Image src={item.image_url || ''} alt={item.title} fill className="object-cover" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="font-semibold">{item.title}</p>

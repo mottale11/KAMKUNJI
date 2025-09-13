@@ -3,36 +3,18 @@ import { useState, useEffect } from 'react';
 import { Zap } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/product-card";
-import { supabase } from "@/lib/supabase";
 import type { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
 
-export function FlashDeals() {
-    const [flashDeals, setFlashDeals] = useState<Product[]>([]);
+export function FlashDeals({ products }: { products: Product[] }) {
     const [loading, setLoading] = useState(true);
 
-     useEffect(() => {
-        const fetchFlashDeals = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .eq('is_flash_deal', true)
-                    .order('created_at', { ascending: false })
-                    .limit(8);
-
-                if (error) throw error;
-                setFlashDeals(data as Product[]);
-            } catch (error) {
-                console.error("Error fetching flash deals:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFlashDeals();
-    }, []);
+    useEffect(() => {
+      if(products) {
+        setLoading(false);
+      }
+    }, [products])
 
     return (
         <section className="py-16 lg:py-24">
@@ -56,7 +38,7 @@ export function FlashDeals() {
                             </div>
                         ))}
                     </div>
-                ) : flashDeals.length > 0 ? (
+                ) : products.length > 0 ? (
                     <Carousel
                         opts={{
                             align: "start",
@@ -65,7 +47,7 @@ export function FlashDeals() {
                         className="w-full"
                     >
                         <CarouselContent>
-                            {flashDeals.map((product) => (
+                            {products.map((product) => (
                                 <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/4">
                                     <ProductCard product={product} />
                                 </CarouselItem>

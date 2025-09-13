@@ -6,6 +6,8 @@ import { FeaturedCategories } from '@/components/home/featured-categories';
 import { FlashDeals } from '@/components/home/flash-deals';
 import { NewArrivals } from '@/components/home/new-arrivals';
 import { Newsletter } from '@/components/home/newsletter';
+import { FlashDealsServer } from '@/components/home/flash-deals-server';
+import { NewArrivalsServer } from '@/components/home/new-arrivals-server';
 
 export default function Home() {
   return (
@@ -14,8 +16,8 @@ export default function Home() {
       <main className="flex-1 pl-8 pr-4">
         <HeroSection />
         <FeaturedCategories />
-        <FlashDeals />
-        <NewArrivals />
+        <FlashDealsServer />
+        <NewArrivalsServer />
         <Newsletter />
       </main>
       <Footer />

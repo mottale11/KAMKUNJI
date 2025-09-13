@@ -70,7 +70,7 @@ export default function CartPage() {
                             <Card key={item.product.id} className="overflow-hidden">
                                 <CardContent className="p-4 flex gap-4 items-center">
                                     <div className="relative w-24 h-24 rounded-md overflow-hidden">
-                                        <Image src={item.product.imageUrl} alt={item.product.title} fill className="object-cover" />
+                                        <Image src={item.product.image_url} alt={item.product.title} fill className="object-cover" />
                                     </div>
                                     <div className="flex-1">
                                         <Link href={`/product/${item.product.id}`} className="font-semibold hover:underline">{item.product.title}</Link>

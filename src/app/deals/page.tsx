@@ -9,31 +9,35 @@ import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
+async function fetchDeals() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_flash_deal', true)
+    .order('created_at', { ascending: false })
+    .limit(12);
+  
+  if (error) {
+    console.error("Error fetching deals:", error);
+    return [];
+  }
+  return data as Product[];
+}
+
+
 export default function DealsPage() {
   const [deals, setDeals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDeals = async () => {
+    const getDeals = async () => {
       setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('is_flash_deal', true)
-          .order('created_at', { ascending: false })
-          .limit(12);
-        
-        if (error) throw error;
-        setDeals(data as Product[]);
-      } catch (error) {
-        console.error("Error fetching deals:", error);
-      } finally {
-        setLoading(false);
-      }
+      const fetchedDeals = await fetchDeals();
+      setDeals(fetchedDeals);
+      setLoading(false);
     };
 
-    fetchDeals();
+    getDeals();
   }, []);
 
   return (

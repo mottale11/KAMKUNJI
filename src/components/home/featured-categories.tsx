@@ -58,12 +58,12 @@ export function FeaturedCategories() {
                                 <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                     <div className="aspect-square relative">
                                         <Image
-                                            src={category.imageUrl}
+                                            src={category.image_url}
                                             alt={category.name}
                                             fill
                                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                                             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw"
-                                            data-ai-hint={category.imageHint}
+                                            data-ai-hint={category.image_hint}
                                         />
                                     </div>
                                     <div className="p-3 bg-background">

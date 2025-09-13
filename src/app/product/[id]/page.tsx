@@ -114,8 +114,8 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     return notFound();
   }
   
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercentage = hasDiscount ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) : 0;
+  const hasDiscount = product.original_price && product.original_price > product.price;
+  const discountPercentage = hasDiscount ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100) : 0;
 
   const handleAddToCart = () => {
     addToCart(product, quantity);
@@ -158,13 +158,13 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <div className="container grid md:grid-cols-2 gap-12 items-start">
           <div className="relative aspect-square md:aspect-[4/3]">
              <Image
-              src={product.imageUrl}
+              src={product.image_url}
               alt={product.title}
               fill
               className="object-cover rounded-lg"
               sizes="(max-width: 768px) 100vw, 50vw"
               priority
-              data-ai-hint={product.imageHint}
+              data-ai-hint={product.image_hint}
             />
             {hasDiscount && (
                 <Badge className="absolute top-4 left-4 bg-destructive text-destructive-foreground">
@@ -182,7 +182,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                     <StarRating rating={product.rating} size={20} />
-                    <span className="text-sm text-muted-foreground">({product.reviewCount} reviews)</span>
+                    <span className="text-sm text-muted-foreground">({product.review_count} reviews)</span>
                 </div>
                 <Separator orientation="vertical" className="h-4" />
                 {product.stock && product.stock > 0 ? (
@@ -198,7 +198,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <div className="flex items-baseline gap-2 font-headline">
               <p className="text-3xl font-bold text-primary">Ksh {product.price.toFixed(2)}</p>
               {hasDiscount && (
-                <p className="text-xl text-muted-foreground line-through">Ksh {product.originalPrice!.toFixed(2)}</p>
+                <p className="text-xl text-muted-foreground line-through">Ksh {product.original_price!.toFixed(2)}</p>
               )}
             </div>
             

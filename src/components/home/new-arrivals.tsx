@@ -4,35 +4,17 @@ import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-export function NewArrivals() {
-    const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+export function NewArrivals({ products }: { products: Product[] }) {
     const [loading, setLoading] = useState(true);
 
-     useEffect(() => {
-        const fetchNewArrivals = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .eq('is_new_arrival', true)
-                    .order('created_at', { ascending: false })
-                    .limit(8);
-
-                if (error) throw error;
-                setNewArrivals(data as Product[]);
-            } catch (error) {
-                console.error("Error fetching new arrivals:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchNewArrivals();
-    }, []);
+    useEffect(() => {
+        if(products) {
+            setLoading(false);
+        }
+    }, [products]);
 
 
     return (
@@ -54,8 +36,8 @@ export function NewArrivals() {
                                 <Skeleton className="h-4 w-1/2" />
                             </div>
                         ))
-                    ) : newArrivals.length > 0 ? (
-                        newArrivals.map((product) => (
+                    ) : products.length > 0 ? (
+                        products.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))
                     ) : (

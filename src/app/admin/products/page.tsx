@@ -131,7 +131,7 @@ export default function ProductsPage() {
                                             alt={product.title}
                                             className="aspect-square rounded-md object-cover"
                                             height="64"
-                                            src={product.imageUrl}
+                                            src={product.image_url}
                                             width="64"
                                         />
                                     </TableCell>
