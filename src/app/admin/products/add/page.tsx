@@ -8,17 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockCategories } from "@/lib/mock-data";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import type { Category } from "@/lib/types";
 
 const productSchema = z.object({
     name: z.string().min(1, "Product name is required"),
@@ -48,6 +48,7 @@ export default function AddProductPage() {
     const router = useRouter();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema),
@@ -56,6 +57,14 @@ export default function AddProductPage() {
             isFlashDeal: false
         }
     });
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const { data, error } = await supabase.from('categories').select('*');
+            if (data) setCategories(data);
+        };
+        fetchCategories();
+    }, []);
 
     const imageFile = watch('image');
 
@@ -69,6 +78,7 @@ export default function AddProductPage() {
             reader.readAsDataURL(file);
         } else {
             setImagePreview(null);
+            setValue("image", new File([], ""), { shouldValidate: true });
         }
     };
 
@@ -94,7 +104,7 @@ export default function AddProductPage() {
         setIsSubmitting(true);
         try {
             // 1. Upload image to Supabase Storage
-            const filePath = `products/${Date.now()}_${data.image.name}`;
+            const filePath = `public/${Date.now()}_${data.image.name}`;
             const { error: uploadError } = await supabase.storage
                 .from('product-images')
                 .upload(filePath, data.image);
@@ -113,7 +123,7 @@ export default function AddProductPage() {
                     title: data.name,
                     description: data.description,
                     price: data.price,
-                    originalPrice: data.originalPrice,
+                    originalPrice: data.originalPrice || null,
                     category: data.category,
                     stock: data.stock,
                     imageUrl: publicUrl,
@@ -217,13 +227,13 @@ export default function AddProductPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                  <div className="space-y-2">
-                                    <Label htmlFor="originalPrice">Original Price (Ksh)</Label>
-                                    <Input id="originalPrice" type="number" placeholder="e.g. 5500.00" {...register("originalPrice")} />
+                                    <Label htmlFor="originalPrice">Original Price (Ksh) (Optional)</Label>
+                                    <Input id="originalPrice" type="number" step="0.01" placeholder="e.g. 5500.00" {...register("originalPrice")} />
                                     {errors.originalPrice && <p className="text-sm text-destructive">{errors.originalPrice.message}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="price">Sale Price (Ksh)</Label>
-                                    <Input id="price" type="number" placeholder="e.g. 4500.00" {...register("price")} />
+                                    <Input id="price" type="number" step="0.01" placeholder="e.g. 4500.00" {...register("price")} />
                                      {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
                                 </div>
                                 <div className="space-y-2">
@@ -251,7 +261,7 @@ export default function AddProductPage() {
                                                     <SelectValue placeholder="Select a category" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {mockCategories.map(cat => (
+                                                    {categories.map(cat => (
                                                         <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -288,7 +298,9 @@ export default function AddProductPage() {
                     <Button variant="outline" asChild>
                         <Link href="/admin/products">Cancel</Link>
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Product'}</Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Saving...</> : 'Save Product'}
+                    </Button>
                 </div>
             </form>
         </>

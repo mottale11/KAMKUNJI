@@ -27,11 +27,13 @@ export default function CustomersPage() {
                 if (ordersError) throw ordersError;
 
                 const spendingData: { [email: string]: number } = {};
-                orders.forEach(order => {
-                    if (order.customer && order.customer.email) {
-                        spendingData[order.customer.email] = (spendingData[order.customer.email] || 0) + order.total;
-                    }
-                });
+                if (orders) {
+                    orders.forEach(order => {
+                        if (order.customer && order.customer.email) {
+                            spendingData[order.customer.email] = (spendingData[order.customer.email] || 0) + order.total;
+                        }
+                    });
+                }
 
                 // Fetch all customers from the 'customers' table
                 const { data: customerList, error: customersError } = await supabase
@@ -101,14 +103,14 @@ export default function CustomersPage() {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar>
-                                                    <AvatarImage src={`https://picsum.photos/seed/avatar${index+1}/40/40`} />
+                                                    <AvatarImage src={`https://i.pravatar.cc/40?u=${customer.email}`} />
                                                     <AvatarFallback>{customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                                 </Avatar>
                                                 <span className="font-medium">{customer.name}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell>{customer.email}</TableCell>
-                                        <TableCell className="hidden md:table-cell">Ksh {customer.totalSpent.toFixed(2)}</TableCell>
+                                        <TableCell className="hidden md:table-cell">Ksh {customer.totalSpent?.toFixed(2) ?? '0.00'}</TableCell>
                                         <TableCell>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>

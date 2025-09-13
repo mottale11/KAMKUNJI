@@ -13,7 +13,7 @@ import {
     TabsList,
     TabsTrigger,
   } from "@/components/ui/tabs"
-import { Users, CreditCard, Activity, DollarSign, Bell, BarChart } from "lucide-react";
+import { Users, CreditCard, Activity, DollarSign, Bell, BarChart, Loader2 } from "lucide-react";
 import { Overview } from "@/components/admin/overview";
 import { RecentSales } from "@/components/admin/recent-sales";
 import { NewOrders } from "@/components/admin/new-orders";
@@ -40,7 +40,7 @@ interface DashboardStats {
         const fetchDashboardData = async () => {
             setLoading(true);
             try {
-                const { data: orders, error: ordersError } = await supabase.from('orders').select('created_at, total, customer');
+                const { data: orders, error: ordersError } = await supabase.from('orders').select('created_at, total');
                 if (ordersError) throw ordersError;
                 
                 const { data: customers, error: customersError } = await supabase.from('customers').select('created_at');
@@ -89,8 +89,8 @@ interface DashboardStats {
         fetchDashboardData();
     }, []);
 
-    const formatChange = (change: number) => {
-        if (change === 0 || !isFinite(change)) return `+0% from last month`;
+    const formatChange = (change: number | undefined) => {
+        if (change === undefined || !isFinite(change)) return `+0% from last month`;
         const sign = change > 0 ? '+' : '';
         return `${sign}${change.toFixed(1)}% from last month`;
     };
@@ -101,101 +101,109 @@ interface DashboardStats {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="analytics" asChild><a href="/admin/analytics">Analytics</a></TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="notifications">
+            <TabsTrigger value="reports" disabled>Reports</TabsTrigger>
+            <TabsTrigger value="notifications" disabled>
               Notifications
               <Badge className="ml-2 bg-red-500 text-white">0</Badge>
             </TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Revenue
-                  </CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Ksh {stats?.totalRevenue.toFixed(2) ?? '0.00'}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats ? formatChange(stats.revenueChange) : '+0% from last month'}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Customers
-                  </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+{stats?.totalCustomers ?? 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats ? formatChange(stats.customerChange) : '+0% from last month'}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Sales</CardTitle>
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+{stats?.totalSales ?? 0}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {stats ? formatChange(stats.salesChange) : '+0% from last month'}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Active Now
-                  </CardTitle>
-                  <Activity className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+0</div>
-                  <p className="text-xs text-muted-foreground">
-                    +0 since last hour
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
-                <CardHeader>
-                  <CardTitle>Overview</CardTitle>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <Overview />
-                </CardContent>
-              </Card>
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Recent Sales</CardTitle>
-                  <CardDescription>
-                    You made {stats?.totalSales ?? 0} sales this month.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RecentSales />
-                </CardContent>
-              </Card>
-            </div>
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-full">
-                    <CardHeader>
-                        <CardTitle>New Orders</CardTitle>
-                        <CardDescription>A list of the most recent orders to be processed.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <NewOrders />
-                    </CardContent>
-                </Card>
-             </div>
+            {loading ? (
+                <div className="flex justify-center items-center py-10">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+            ) : (
+                <>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Total Revenue
+                        </CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                        <div className="text-2xl font-bold">Ksh {stats?.totalRevenue.toFixed(2) ?? '0.00'}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {formatChange(stats?.revenueChange)}
+                        </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Customers
+                        </CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                        <div className="text-2xl font-bold">+{stats?.totalCustomers ?? 0}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {formatChange(stats?.customerChange)}
+                        </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Sales</CardTitle>
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                        <div className="text-2xl font-bold">+{stats?.totalSales ?? 0}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {formatChange(stats?.salesChange)}
+                        </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Active Now
+                        </CardTitle>
+                        <Activity className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                        <div className="text-2xl font-bold">+0</div>
+                         <p className="text-xs text-muted-foreground">
+                            (real-time data coming soon)
+                         </p>
+                        </CardContent>
+                    </Card>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                    <Card className="col-span-4">
+                        <CardHeader>
+                        <CardTitle>Overview</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                        <Overview />
+                        </CardContent>
+                    </Card>
+                    <Card className="col-span-3">
+                        <CardHeader>
+                        <CardTitle>Recent Sales</CardTitle>
+                        <CardDescription>
+                            You made {stats?.totalSales ?? 0} sales this month.
+                        </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                        <RecentSales />
+                        </CardContent>
+                    </Card>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                        <Card className="col-span-full">
+                            <CardHeader>
+                                <CardTitle>New Orders</CardTitle>
+                                <CardDescription>A list of the most recent orders to be processed.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <NewOrders />
+                            </CardContent>
+                        </Card>
+                    </div>
+                </>
+            )}
           </TabsContent>
            <TabsContent value="analytics" className="space-y-4">
             <p className="text-muted-foreground">Analytics will be displayed here. Click the tab to navigate to the main analytics page.</p>
@@ -205,7 +213,7 @@ interface DashboardStats {
                 <BarChart className="h-12 w-12 text-muted-foreground mx-auto" />
                 <h3 className="text-lg font-semibold mt-4">No Reports Generated</h3>
                 <p className="text-muted-foreground text-sm mt-2">You haven't generated any reports yet. When you do, they will appear here.</p>
-                <Button className="mt-4">Generate Report</Button>
+                <Button className="mt-4" disabled>Generate Report</Button>
             </div>
           </TabsContent>
           <TabsContent value="notifications" className="space-y-4">
