@@ -6,12 +6,12 @@ export interface Product {
   description: string;
   price: number;
   original_price?: number | null;
-  category: string;
+  category_id: string;
   image_url: string;
   image_hint: string;
   rating: number;
   review_count: number;
-  stock?: number;
+  stock: number;
   is_new_arrival?: boolean;
   is_flash_deal?: boolean;
   created_at?: string;
@@ -57,4 +57,5 @@ export interface Order {
   };
   created_at: string;
 }
+
 

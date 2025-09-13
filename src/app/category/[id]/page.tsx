@@ -39,7 +39,7 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
         const { data: productsData, error: productsError } = await supabase
             .from('products')
             .select('*')
-            .eq('category', categoryData.name);
+            .eq('category_id', params.id);
         
         if (productsError) throw productsError;
 

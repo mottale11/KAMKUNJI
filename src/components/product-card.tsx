@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { StarRating } from '@/components/star-rating';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface ProductCardProps {
   product: Product;
@@ -18,9 +20,21 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const [categoryName, setCategoryName] = useState('');
   
   const hasDiscount = product.original_price && product.original_price > product.price;
   const discountPercentage = hasDiscount ? Math.round(((product.original_price! - product.price) / product.original_price!) * 100) : 0;
+
+  useEffect(() => {
+    const getCategory = async () => {
+        const { data } = await supabase.from('categories').select('name').eq('id', product.category_id).single();
+        if (data) {
+            setCategoryName(data.name);
+        }
+    }
+    getCategory();
+  }, [product.category_id]);
+
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -52,7 +66,7 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
           <div className="p-4 space-y-2 flex flex-col flex-grow">
-            <p className="text-sm text-muted-foreground">{product.category}</p>
+            <p className="text-sm text-muted-foreground">{categoryName}</p>
             <h3 className="font-semibold text-base h-12 leading-tight line-clamp-2">{product.title}</h3>
             <div className="flex items-center gap-2">
                 <StarRating rating={product.rating} size={14} />

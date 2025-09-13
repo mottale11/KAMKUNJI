@@ -68,12 +68,13 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 return;
             }
             
-            setProduct(productData as Product);
+            const currentProduct = productData as Product;
+            setProduct(currentProduct);
 
             const { data: categoryData, error: categoryError } = await supabase
                 .from('categories')
                 .select('*')
-                .eq('name', productData.category)
+                .eq('id', currentProduct.category_id)
                 .single();
             
             if (categoryData) {
@@ -83,8 +84,8 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             const { data: relatedData, error: relatedError } = await supabase
                 .from('products')
                 .select('*')
-                .eq('category', productData.category)
-                .neq('id', productData.id)
+                .eq('category_id', currentProduct.category_id)
+                .neq('id', currentProduct.id)
                 .limit(4);
             
             if (relatedData) {
@@ -144,7 +145,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                     <Link href={`/category/${category.id}`}>{category.name}</Link>
                    </BreadcrumbLink>
                 ) : (
-                    <span>{product.category}</span>
+                    <span>Category</span>
                 )}
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -176,7 +177,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           <div className="space-y-6">
             <div>
                 <h1 className="text-3xl lg:text-4xl font-bold font-headline">{product.title}</h1>
-                <p className="text-muted-foreground mt-2">{product.category}</p>
+                <p className="text-muted-foreground mt-2">{category?.name}</p>
             </div>
 
             <div className="flex items-center gap-4">
