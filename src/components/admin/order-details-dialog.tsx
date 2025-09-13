@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -22,52 +23,44 @@ interface OrderItem {
     quantity: number;
     price: number;
     title: string;
-}
-
-interface OrderProduct extends Product {
-    quantity: number;
+    imageUrl?: string;
 }
 
 export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDialogProps) {
-    const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([]);
+    const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
     const [loading, setLoading] = useState(true);
 
      useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchProductDetails = async () => {
             if (!order || !order.items) return;
 
             setLoading(true);
             try {
-                const orderItems = order.items as OrderItem[];
-                const productIds = orderItems.map(item => item.productId);
-                if (productIds.length === 0) {
-                     setOrderProducts([]);
-                     setLoading(false);
-                     return;
-                }
-
-                const { data: productsData, error } = await supabase
-                    .from('products')
-                    .select('*')
-                    .in('id', productIds);
-
-                if (error) throw error;
-
-                const productsWithQuantity = orderItems.map(item => {
-                    const product = productsData.find(p => p.id.toString() === item.productId.toString());
-                    return product ? { ...product, quantity: item.quantity } : null;
-                }).filter((p): p is OrderProduct => p !== null);
-                
-                setOrderProducts(productsWithQuantity);
+                const itemsWithDetails = await Promise.all(
+                    order.items.map(async (item) => {
+                        const { data: productData, error } = await supabase
+                            .from('products')
+                            .select('imageUrl')
+                            .eq('id', item.productId)
+                            .single();
+                        
+                        return {
+                            ...item,
+                            imageUrl: productData?.imageUrl || 'https://placehold.co/100x100'
+                        };
+                    })
+                );
+                setOrderItems(itemsWithDetails);
             } catch (error) {
                 console.error("Error fetching product details for order:", error);
+                 setOrderItems(order.items.map(item => ({...item, imageUrl: 'https://placehold.co/100x100'})));
             } finally {
                 setLoading(false);
             }
         };
 
         if (open) {
-            fetchProducts();
+            fetchProductDetails();
         }
     }, [order, open]);
 
@@ -89,16 +82,16 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                         <div>
                             <h3 className="font-semibold mb-2">Items</h3>
                             <div className="space-y-3">
-                                {orderProducts.map(product => (
-                                    <div key={product.id} className="flex items-center gap-4">
+                                {orderItems.map(item => (
+                                    <div key={item.productId} className="flex items-center gap-4">
                                         <div className="relative w-16 h-16 rounded-md overflow-hidden border">
-                                            <Image src={product.imageUrl} alt={product.title} fill className="object-cover" />
+                                            <Image src={item.imageUrl || ''} alt={item.title} fill className="object-cover" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="font-semibold">{product.title}</p>
-                                            <p className="text-sm text-muted-foreground">Qty: {product.quantity}</p>
+                                            <p className="font-semibold">{item.title}</p>
+                                            <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                                         </div>
-                                        <p className="font-medium">Ksh {(product.price * product.quantity).toFixed(2)}</p>
+                                        <p className="font-medium">Ksh {(item.price * item.quantity).toFixed(2)}</p>
                                     </div>
                                 ))}
                             </div>

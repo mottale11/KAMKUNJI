@@ -1,10 +1,11 @@
 
+
 export interface Product {
   id: string;
   title: string;
   description: string;
   price: number;
-  originalPrice?: number;
+  originalPrice?: number | null;
   category: string;
   imageUrl: string;
   imageHint: string;
@@ -56,3 +57,4 @@ export interface Order {
   };
   created_at: string;
 }
+

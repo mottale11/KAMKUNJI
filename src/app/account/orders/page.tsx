@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +31,7 @@ export default function AccountOrdersPage() {
 
     useEffect(() => {
         if (userLoading) return;
-        if (!user) {
+        if (!user || !user.email) {
             setLoading(false);
             return;
         }
@@ -41,7 +42,7 @@ export default function AccountOrdersPage() {
                 const { data, error } = await supabase
                     .from('orders')
                     .select('*')
-                    .eq('customer->>email', user.email)
+                    .eq('customer->>email', user.email!)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
@@ -103,6 +104,7 @@ export default function AccountOrdersPage() {
                  <p className="text-muted-foreground">You haven't placed any orders yet.</p>
              ) : (
                 orders.map((order) => {
+                    const orderItems = order.items || [];
                     return (
                         <Card key={order.id}>
                             <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
@@ -148,7 +150,7 @@ export default function AccountOrdersPage() {
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                            {(order.items as any[]).map(item => (
+                            {orderItems.map(item => (
                                     <div key={item.productId} className="flex items-center gap-4">
                                         <div className="flex-1">
                                             <Link href={`/product/${item.productId}`} className="font-semibold hover:underline">{item.title}</Link>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -45,11 +46,16 @@ export default function AdminLoginPage() {
     });
 
     if (error) {
-        // If user does not exist, try to create it
-        if (error.message === 'Invalid login credentials') {
+        // If user does not exist (invalid credentials), try to create it
+        if (error.message.includes('Invalid login credentials')) {
             const { error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
+                 options: {
+                    data: {
+                        full_name: 'Kamkunji Admin',
+                    }
+                }
             });
 
             if (signUpError) {
@@ -63,6 +69,7 @@ export default function AdminLoginPage() {
                     title: "Admin Account Created",
                     description: "Your admin account has been set up. Logging in...",
                 });
+                // After sign up, supabase automatically signs the user in.
                 router.push('/admin');
             }
         } else {

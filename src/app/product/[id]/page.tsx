@@ -1,4 +1,5 @@
 
+
 'use client'
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -137,7 +138,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem>
+               <BreadcrumbItem>
                 {category ? (
                    <BreadcrumbLink asChild>
                     <Link href={`/category/${category.id}`}>{category.name}</Link>
@@ -242,3 +243,4 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+

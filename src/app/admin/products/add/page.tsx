@@ -28,7 +28,7 @@ const productSchema = z.object({
       z.number().positive("Price must be a positive number")
     ),
     originalPrice: z.preprocess(
-      (a) => (a === '' || a === undefined || a === null ? undefined : parseFloat(z.string().parse(a))),
+      (a) => (a === '' || a === undefined || a === null ? null : parseFloat(z.string().parse(a))),
       z.number().positive("Original price must be a positive number").optional().nullable()
     ),
     stock: z.preprocess(
@@ -54,7 +54,8 @@ export default function AddProductPage() {
         resolver: zodResolver(productSchema),
         defaultValues: {
             isNewArrival: false,
-            isFlashDeal: false
+            isFlashDeal: false,
+            originalPrice: null,
         }
     });
 
