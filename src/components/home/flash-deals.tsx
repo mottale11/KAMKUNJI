@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { Zap } from "lucide-react";
@@ -19,7 +18,7 @@ export function FlashDeals() {
                 const { data, error } = await supabase
                     .from('products')
                     .select('*')
-                    .eq('isFlashDeal', true)
+                    .eq('isFlashDeal', 'true')
                     .order('created_at', { ascending: false })
                     .limit(8);
 

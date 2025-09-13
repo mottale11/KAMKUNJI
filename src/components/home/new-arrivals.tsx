@@ -1,4 +1,3 @@
-
 'use client'
 import { useState, useEffect } from 'react';
 import { ProductCard } from "@/components/product-card";
@@ -19,7 +18,7 @@ export function NewArrivals() {
                 const { data, error } = await supabase
                     .from('products')
                     .select('*')
-                    .eq('isNewArrival', true)
+                    .eq('isNewArrival', 'true')
                     .order('created_at', { ascending: false })
                     .limit(8);
 

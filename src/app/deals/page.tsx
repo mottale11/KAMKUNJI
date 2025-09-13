@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -21,7 +20,7 @@ export default function DealsPage() {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .eq('isFlashDeal', true)
+          .eq('isFlashDeal', 'true')
           .order('created_at', { ascending: false })
           .limit(12);
         
