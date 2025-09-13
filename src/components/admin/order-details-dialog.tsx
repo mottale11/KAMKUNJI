@@ -17,6 +17,13 @@ interface OrderDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface OrderItem {
+    productId: string;
+    quantity: number;
+    price: number;
+    title: string;
+}
+
 interface OrderProduct extends Product {
     quantity: number;
 }
@@ -31,7 +38,8 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
 
             setLoading(true);
             try {
-                const productIds = order.items.map(item => item.productId);
+                const orderItems = order.items as OrderItem[];
+                const productIds = orderItems.map(item => item.productId);
                 if (productIds.length === 0) {
                      setOrderProducts([]);
                      setLoading(false);
@@ -45,11 +53,11 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
 
                 if (error) throw error;
 
-                const productsWithQuantity = order.items.map(item => {
-                    const product = productsData.find(p => p.id === item.productId);
+                const productsWithQuantity = orderItems.map(item => {
+                    const product = productsData.find(p => p.id.toString() === item.productId.toString());
                     return product ? { ...product, quantity: item.quantity } : null;
                 }).filter((p): p is OrderProduct => p !== null);
-
+                
                 setOrderProducts(productsWithQuantity);
             } catch (error) {
                 console.error("Error fetching product details for order:", error);
@@ -69,7 +77,7 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                 <DialogHeader>
                     <DialogTitle>Order Details</DialogTitle>
                     <DialogDescription>
-                        Order #{String(order.id).slice(0, 7)} - {new Date(order.date).toLocaleDateString()}
+                        Order #{String(order.id).slice(0, 7)} - {new Date(order.created_at).toLocaleDateString()}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6">
@@ -109,20 +117,20 @@ export function OrderDetailsDialog({ order, open, onOpenChange }: OrderDetailsDi
                                 <Mail className="h-3 w-3" />
                                 {order.customer.email}
                             </p>
-                             {order.deliveryInfo?.phone && (
+                             {order.delivery_info?.phone && (
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                     <Phone className="h-3 w-3" />
-                                    {order.deliveryInfo.phone}
+                                    {order.delivery_info.phone}
                                 </p>
                              )}
                         </div>
-                        {order.deliveryInfo && (
+                        {order.delivery_info && (
                             <div>
                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><MapPin className="h-4 w-4" /> Shipping Address</h3>
                                 <address className="text-sm not-italic text-muted-foreground">
-                                    {order.deliveryInfo.name}<br />
-                                    {order.deliveryInfo.address}<br />
-                                    {order.deliveryInfo.city}, {order.deliveryInfo.county}
+                                    {order.delivery_info.name}<br />
+                                    {order.delivery_info.address}<br />
+                                    {order.delivery_info.city}, {order.delivery_info.county}
                                 </address>
                             </div>
                         )}

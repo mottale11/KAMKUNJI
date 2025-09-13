@@ -12,7 +12,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MapPin, Loader2, ShoppingCart } from 'lucide-react';
+import { Loader2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { initiateMpesaPayment } from '@/ai/flows/mpesa-payment';
 import { useCart } from '@/context/cart-context';
@@ -96,7 +96,6 @@ export default function CheckoutPage() {
                                 name: user.user_metadata.full_name || name,
                                 email: user.email,
                             },
-                            date: new Date().toISOString(),
                             status: 'Pending',
                             total: total,
                             items: cart.map(item => ({
@@ -105,7 +104,7 @@ export default function CheckoutPage() {
                                 price: item.product.price, // store price at time of purchase
                                 title: item.product.title,
                             })),
-                            deliveryInfo: {
+                            delivery_info: {
                                 name,
                                 phone,
                                 address,

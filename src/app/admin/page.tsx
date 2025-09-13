@@ -13,16 +13,14 @@ import {
     TabsList,
     TabsTrigger,
   } from "@/components/ui/tabs"
-import { Users, CreditCard, Activity, DollarSign, Bell, ShoppingBag, BarChart } from "lucide-react";
+import { Users, CreditCard, Activity, DollarSign, Bell, BarChart } from "lucide-react";
 import { Overview } from "@/components/admin/overview";
 import { RecentSales } from "@/components/admin/recent-sales";
 import { NewOrders } from "@/components/admin/new-orders";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Order } from "@/lib/types";
 
 interface DashboardStats {
     totalRevenue: number;
@@ -42,22 +40,21 @@ interface DashboardStats {
         const fetchDashboardData = async () => {
             setLoading(true);
             try {
-                const { data: orders, error } = await supabase.from('orders').select('date, total, customer');
-                if (error) throw error;
+                const { data: orders, error: ordersError } = await supabase.from('orders').select('created_at, total, customer');
+                if (ordersError) throw ordersError;
                 
+                const { data: customers, error: customersError } = await supabase.from('customers').select('created_at');
+                if (customersError) throw customersError;
+
                 const now = new Date();
                 const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
 
-                const currentMonthOrders = orders.filter(o => {
-                    const orderDate = new Date(o.date);
-                    return orderDate > oneMonthAgo;
-                });
-
-                const previousMonthOrders = orders.filter(o => {
-                    const orderDate = new Date(o.date);
-                    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
-                    return orderDate > twoMonthsAgo && orderDate <= oneMonthAgo;
-                });
+                const currentMonthOrders = orders.filter(o => new Date(o.created_at) > oneMonthAgo);
+                const previousMonthOrders = orders.filter(o => new Date(o.created_at) > twoMonthsAgo && new Date(o.created_at) <= oneMonthAgo);
+                
+                const currentMonthCustomers = customers.filter(c => new Date(c.created_at) > oneMonthAgo);
+                const previousMonthCustomers = customers.filter(c => new Date(c.created_at) > twoMonthsAgo && new Date(c.created_at) <= oneMonthAgo);
 
                 const totalRevenue = currentMonthOrders.reduce((acc, order) => acc + order.total, 0);
                 const prevMonthRevenue = previousMonthOrders.reduce((acc, order) => acc + order.total, 0);
@@ -65,10 +62,8 @@ interface DashboardStats {
                 const totalSales = currentMonthOrders.length;
                 const prevMonthSales = previousMonthOrders.length;
 
-                const customerEmails = new Set(currentMonthOrders.map(o => o.customer.email));
-                const totalCustomers = customerEmails.size;
-                const prevCustomerEmails = new Set(previousMonthOrders.map(o => o.customer.email));
-                const prevTotalCustomers = prevCustomerEmails.size;
+                const totalCustomers = currentMonthCustomers.length;
+                const prevTotalCustomers = previousMonthCustomers.length;
                 
                 const calculateChange = (current: number, previous: number) => {
                     if (previous === 0) return current > 0 ? 100 : 0;
@@ -95,7 +90,7 @@ interface DashboardStats {
     }, []);
 
     const formatChange = (change: number) => {
-        if (change === 0) return `+0% from last month`;
+        if (change === 0 || !isFinite(change)) return `+0% from last month`;
         const sign = change > 0 ? '+' : '';
         return `${sign}${change.toFixed(1)}% from last month`;
     };

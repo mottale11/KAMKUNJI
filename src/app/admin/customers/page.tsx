@@ -9,14 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-
-interface Customer {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    totalSpent: number;
-}
+import type { Customer } from "@/lib/types";
 
 export default function CustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -40,7 +33,7 @@ export default function CustomersPage() {
                     }
                 });
 
-                // Fetch all customers from the 'customers' collection
+                // Fetch all customers from the 'customers' table
                 const { data: customerList, error: customersError } = await supabase
                     .from('customers')
                     .select('*')

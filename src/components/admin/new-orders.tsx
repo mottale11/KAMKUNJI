@@ -24,7 +24,7 @@ import type { Order } from "@/lib/types";
                     .from('orders')
                     .select('*')
                     .eq('status', 'Pending')
-                    .order('date', { ascending: false })
+                    .order('created_at', { ascending: false })
                     .limit(5);
 
                 if (error) throw error;

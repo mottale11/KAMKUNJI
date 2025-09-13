@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from "@/lib/supabase";
-import { mockCategories } from '@/lib/mock-data';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Minus, Plus, ShoppingCart, CheckCircle, Loader2 } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
-import type { Product } from '@/lib/types';
+import type { Product, Category } from '@/lib/types';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
 
@@ -46,6 +45,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     const { toast } = useToast();
     const [product, setProduct] = useState<Product | null>(null);
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+    const [category, setCategory] = useState<Category | null>(null);
     const [loading, setLoading] = useState(true);
     const [productUrl, setProductUrl] = useState('');
     const [quantity, setQuantity] = useState(1);
@@ -68,6 +68,16 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             }
             
             setProduct(productData as Product);
+
+            const { data: categoryData, error: categoryError } = await supabase
+                .from('categories')
+                .select('*')
+                .eq('name', productData.category)
+                .single();
+            
+            if (categoryData) {
+                setCategory(categoryData as Category);
+            }
 
             const { data: relatedData, error: relatedError } = await supabase
                 .from('products')
@@ -102,8 +112,6 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   if (!product) {
     return notFound();
   }
-  
-  const category = mockCategories.find((c) => c.name === product.category);
   
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercentage = hasDiscount ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100) : 0;

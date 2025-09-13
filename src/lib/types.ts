@@ -13,6 +13,7 @@ export interface Product {
   stock?: number;
   isNewArrival?: boolean;
   isFlashDeal?: boolean;
+  created_at?: string;
 }
 
 export interface Category {
@@ -20,15 +21,24 @@ export interface Category {
   name: string;
   imageUrl: string;
   imageHint: string;
+  created_at?: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  created_at?: string;
+  totalSpent?: number;
 }
 
 export interface Order {
-  id:string;
+  id: string;
   customer: {
     name: string;
     email: string | null;
   };
-  date: string;
   status: 'Pending' | 'Shipped' | 'Delivered' | 'Canceled';
   total: number;
   items: {
@@ -37,12 +47,12 @@ export interface Order {
     price: number;
     title: string;
   }[];
-  deliveryInfo: {
+  delivery_info: {
     name: string;
     phone: string;
     address: string;
     city: string;
     county: string;
   };
-  created_at: any;
+  created_at: string;
 }

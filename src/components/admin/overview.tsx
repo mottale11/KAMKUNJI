@@ -3,7 +3,6 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { supabase } from "@/lib/supabase";
-import { Order } from "@/lib/types";
 import { useEffect, useState } from "react";
 
 interface MonthlySales {
@@ -16,7 +15,7 @@ export function Overview() {
 
     useEffect(() => {
         const fetchSalesData = async () => {
-            const { data: orders, error } = await supabase.from('orders').select('date, total');
+            const { data: orders, error } = await supabase.from('orders').select('created_at, total');
 
             if (error || !orders) {
                 console.error('Error fetching sales data', error);
@@ -29,7 +28,7 @@ export function Overview() {
             };
 
             orders.forEach(order => {
-                const orderDate = new Date(order.date);
+                const orderDate = new Date(order.created_at);
                 const monthName = orderDate.toLocaleString('default', { month: 'short' });
                 monthlySales[monthName] += order.total;
             });

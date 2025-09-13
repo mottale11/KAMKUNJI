@@ -38,7 +38,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select('*')
-                .order('date', { ascending: false });
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
             const ordersData = data.map(o => ({...o, id: String(o.id)})) as Order[];
@@ -57,7 +57,7 @@ export default function OrdersPage() {
 
     useEffect(() => {
         fetchOrders();
-    }, []);
+    }, [toast]);
 
     const handleUpdateStatus = async () => {
         if (!actionOrder) return;
@@ -100,7 +100,7 @@ export default function OrdersPage() {
             order.id,
             order.customer.name,
             order.customer.email,
-            new Date(order.date).toISOString().split('T')[0],
+            new Date(order.created_at).toISOString().split('T')[0],
             order.status,
             order.total.toFixed(2)
         ]);
@@ -174,7 +174,7 @@ export default function OrdersPage() {
                                                 {order.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">Ksh {order.total.toFixed(2)}</TableCell>
                                         <TableCell>
                                             <DropdownMenu>

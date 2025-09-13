@@ -5,10 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { mockProducts } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
-import { MoreVertical, Truck, PackageCheck, Ban, RotateCcw } from "lucide-react";
-import Image from "next/image";
+import { MoreVertical, Truck, PackageCheck, Ban } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -31,7 +29,11 @@ export default function AccountOrdersPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user) return;
+        if (userLoading) return;
+        if (!user) {
+            setLoading(false);
+            return;
+        }
 
         const fetchOrders = async () => {
             setLoading(true);
@@ -40,7 +42,7 @@ export default function AccountOrdersPage() {
                     .from('orders')
                     .select('*')
                     .eq('customer->>email', user.email)
-                    .order('date', { ascending: false });
+                    .order('created_at', { ascending: false });
 
                 if (error) throw error;
                 
@@ -55,7 +57,7 @@ export default function AccountOrdersPage() {
         };
 
         fetchOrders();
-    }, [user, toast]);
+    }, [user, userLoading, toast]);
 
      const handleCancelOrder = async (orderId: string) => {
         try {
@@ -106,7 +108,7 @@ export default function AccountOrdersPage() {
                             <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
                                 <div className="grid gap-1.5">
                                     <CardTitle>Order #{String(order.id).slice(0, 7)}</CardTitle>
-                                    <CardDescription>Date: {new Date(order.date).toLocaleDateString()}</CardDescription>
+                                    <CardDescription>Date: {new Date(order.created_at).toLocaleDateString()}</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <Badge

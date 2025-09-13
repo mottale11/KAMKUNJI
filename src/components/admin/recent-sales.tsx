@@ -20,7 +20,7 @@ import type { Order } from "@/lib/types";
                 const { data, error } = await supabase
                     .from('orders')
                     .select('*')
-                    .order('date', { ascending: false })
+                    .order('created_at', { ascending: false })
                     .limit(5);
                 
                 if (error) throw error;
