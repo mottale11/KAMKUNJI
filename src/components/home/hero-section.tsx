@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function HeroSection() {
-    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { image_url: 'https://storage.googleapis.com/aip-dev-images-public-test/fx-assets/images/delivery.jpeg', imageHint: 'fast delivery' };
+    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-main') || { image_url: 'https://picsum.photos/seed/hero/1920/1080', imageHint: 'fast delivery' };
 
     return (
         <section className="relative h-[60vh] md:h-[70vh] w-full text-white">
