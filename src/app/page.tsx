@@ -7,7 +7,7 @@ import { FlashDeals } from '@/components/home/flash-deals';
 import { NewArrivals } from '@/components/home/new-arrivals';
 import { Newsletter } from '@/components/home/newsletter';
 import { supabase } from '@/lib/supabase';
-import type { Product } from '@/lib/types';
+import type { Product, Category } from '@/lib/types';
 
 async function getFlashDeals() {
     try {
@@ -49,17 +49,35 @@ async function getNewArrivals() {
     }
 }
 
+async function getCategories() {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .limit(6);
+        
+        if (error) {
+            console.error("Error fetching categories:", error);
+            return [];
+        };
+        return data as Category[];
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+    }
+}
 
 export default async function Home() {
   const flashDeals = await getFlashDeals();
   const newArrivals = await getNewArrivals();
+  const categories = await getCategories();
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header />
       <main className="flex-1">
         <HeroSection />
-        <FeaturedCategories />
+        <FeaturedCategories categories={categories} />
         <FlashDeals products={flashDeals} />
         <NewArrivals products={newArrivals} />
         <Newsletter />

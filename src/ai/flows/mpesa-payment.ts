@@ -39,7 +39,7 @@ const mpesaPaymentFlow = ai.defineFlow(
   },
   async (input) => {
     const apiKey = process.env.MPESA_API_KEY;
-    if (!apiKey) {
+    if (!apiKey || apiKey === "your_mpesa_api_key_here") {
       console.error("M-Pesa API key is not configured.");
       return {
         success: false,
