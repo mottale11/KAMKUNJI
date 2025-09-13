@@ -9,18 +9,29 @@ import { supabase } from "@/lib/supabase";
 import { Category } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-export function FeaturedCategories({ categories }: { categories: Category[] }) {
+export function FeaturedCategories() {
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (categories && categories.length > 0) {
-            setLoading(false);
-        } else {
-            const timer = setTimeout(() => setLoading(false), 1000); // Wait 1s
-            return () => clearTimeout(timer);
-        }
-    }, [categories]);
+        const fetchCategories = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('categories')
+                    .select('*')
+                    .limit(6);
+                
+                if (error) throw error;
+                setCategories(data as Category[]);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        fetchCategories();
+    }, []);
 
     return (
         <section className="py-16 lg:py-24 bg-card">
@@ -40,7 +51,7 @@ export function FeaturedCategories({ categories }: { categories: Category[] }) {
                                 <Skeleton className="h-4 w-2/3 mx-auto" />
                             </div>
                         ))
-                    ) : (
+                    ) : categories.length > 0 ? (
                         categories.map((category) => (
                             <Link key={category.id} href={`/category/${category.id}`} className="group block">
                                 <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -60,6 +71,8 @@ export function FeaturedCategories({ categories }: { categories: Category[] }) {
                                 </Card>
                             </Link>
                         ))
+                    ) : (
+                        <p className="col-span-full text-muted-foreground text-center">No categories found.</p>
                     )}
                 </div>
             </div>

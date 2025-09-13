@@ -181,7 +181,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                    <StarRating rating={product.rating} size={20} />
+                    <StarRating rating={product.rating || 0} size={20} />
                     <span className="text-sm text-muted-foreground">({product.review_count} reviews)</span>
                 </div>
                 <Separator orientation="vertical" className="h-4" />
@@ -243,4 +243,3 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-

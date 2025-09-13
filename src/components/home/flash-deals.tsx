@@ -1,25 +1,42 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Zap } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/product-card";
+import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 
-
-export function FlashDeals({ products }: { products: Product[] }) {
+export function FlashDeals() {
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      // Products are now passed as props, so we can check if they exist
-      if(products && products.length > 0) {
-        setLoading(false);
-      } else {
-        // Handle case where no products are passed, maybe show loading for a bit then "no deals"
-        const timer = setTimeout(() => setLoading(false), 1000); // Wait 1s
-        return () => clearTimeout(timer);
-      }
-    }, [products])
+        const getFlashDeals = async () => {
+            setLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('is_flash_deal', true)
+                    .order('created_at', { ascending: false })
+                    .limit(8);
+
+                if (error) {
+                    console.error("Error fetching flash deals:", error);
+                } else {
+                    setProducts(data as Product[]);
+                }
+            } catch (error) {
+                console.error("Error fetching flash deals:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getFlashDeals();
+    }, []);
 
     return (
         <section className="py-16 lg:py-24">
