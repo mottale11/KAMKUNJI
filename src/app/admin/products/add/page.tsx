@@ -116,7 +116,7 @@ export default function AddProductPage() {
         try {
             // 1. Sanitize filename and upload image to Supabase Storage
             const sanitizedFileName = data.image.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
-            const filePath = `public/${Date.now()}_${sanitizedFileName}`;
+            const filePath = `${Date.now()}_${sanitizedFileName}`;
             const { error: uploadError } = await supabase.storage
                 .from('product-images')
                 .upload(filePath, data.image);
@@ -315,5 +315,7 @@ export default function AddProductPage() {
         </>
     );
 }
+
+    
 
     
