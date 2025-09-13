@@ -32,6 +32,8 @@ export function ProductCard({ product }: ProductCardProps) {
     });
   };
 
+  const categoryNameToDisplay = product.categoryName || product.categories?.name || 'Uncategorized';
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
       <Link href={`/product/${product.id}`} className="block flex flex-col flex-grow">
@@ -51,11 +53,11 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
           <div className="p-4 space-y-2 flex flex-col flex-grow">
-            <p className="text-sm text-muted-foreground">{product.categoryName || 'Uncategorized'}</p>
+            <p className="text-sm text-muted-foreground">{categoryNameToDisplay}</p>
             <h3 className="font-semibold text-base h-12 leading-tight line-clamp-2">{product.title}</h3>
             <div className="flex items-center gap-2">
                 <StarRating rating={product.rating || 0} size={14} />
-                <span className="text-xs text-muted-foreground">({product.review_count})</span>
+                <span className="text-xs text-muted-foreground">({product.review_count || 0})</span>
             </div>
             <div className="flex items-baseline gap-2 font-headline mt-auto pt-2">
               <p className="text-lg font-bold text-primary">Ksh {product.price.toFixed(2)}</p>

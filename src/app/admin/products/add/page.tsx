@@ -35,7 +35,7 @@ const productSchema = z.object({
       (a) => parseInt(z.string().parse(a), 10),
       z.number().int().min(0, "Stock can't be negative")
     ),
-    category: z.string().min(1, "Category is required"),
+    category_id: z.string().min(1, "Category is required"),
     is_new_arrival: z.boolean().default(false),
     is_flash_deal: z.boolean().default(false),
     image: z.instanceof(File).refine(file => file.size > 0, "Product image is required"),
@@ -114,8 +114,9 @@ export default function AddProductPage() {
     const onSubmit = async (data: ProductFormValues) => {
         setIsSubmitting(true);
         try {
-            // 1. Upload image to Supabase Storage
-            const filePath = `public/${Date.now()}_${data.image.name}`;
+            // 1. Sanitize filename and upload image to Supabase Storage
+            const sanitizedFileName = data.image.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+            const filePath = `public/${Date.now()}_${sanitizedFileName}`;
             const { error: uploadError } = await supabase.storage
                 .from('product-images')
                 .upload(filePath, data.image);
@@ -135,7 +136,7 @@ export default function AddProductPage() {
                     description: data.description,
                     price: data.price,
                     original_price: data.original_price,
-                    category: data.category,
+                    category_id: data.category_id,
                     stock: data.stock,
                     image_url: publicUrl,
                     is_new_arrival: data.is_new_arrival,
@@ -259,24 +260,24 @@ export default function AddProductPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="category">Category</Label>
+                                    <Label htmlFor="category_id">Category</Label>
                                     <Controller
-                                        name="category"
+                                        name="category_id"
                                         control={control}
                                         render={({ field }) => (
                                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCategories}>
-                                                <SelectTrigger id="category">
+                                                <SelectTrigger id="category_id">
                                                     <SelectValue placeholder={loadingCategories ? "Loading categories..." : "Select a category"} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {categories.map(cat => (
-                                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                         )}
                                     />
-                                    {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
+                                    {errors.category_id && <p className="text-sm text-destructive">{errors.category_id.message}</p>}
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Controller
@@ -314,3 +315,5 @@ export default function AddProductPage() {
         </>
     );
 }
+
+    
