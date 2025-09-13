@@ -18,7 +18,7 @@ export function FlashDeals() {
                 const { data, error } = await supabase
                     .from('products')
                     .select('*')
-                    .is('isFlashDeal', true)
+                    .eq('is_flash_deal', true)
                     .order('created_at', { ascending: false })
                     .limit(8);
 

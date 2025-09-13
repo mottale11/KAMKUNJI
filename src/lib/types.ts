@@ -5,23 +5,23 @@ export interface Product {
   title: string;
   description: string;
   price: number;
-  originalPrice?: number | null;
+  original_price?: number | null;
   category: string;
-  imageUrl: string;
-  imageHint: string;
+  image_url: string;
+  image_hint: string;
   rating: number;
-  reviewCount: number;
+  review_count: number;
   stock?: number;
-  isNewArrival?: boolean;
-  isFlashDeal?: boolean;
+  is_new_arrival?: boolean;
+  is_flash_deal?: boolean;
   created_at?: string;
 }
 
 export interface Category {
-  id: string;
+  id: string; // This is a UUID string
   name: string;
-  imageUrl: string;
-  imageHint: string;
+  image_url: string;
+  image_hint: string;
   created_at?: string;
 }
 
@@ -57,4 +57,3 @@ export interface Order {
   };
   created_at: string;
 }
-

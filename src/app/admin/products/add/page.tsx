@@ -27,7 +27,7 @@ const productSchema = z.object({
       (a) => parseFloat(z.string().parse(a)),
       z.number().positive("Price must be a positive number")
     ),
-    originalPrice: z.preprocess(
+    original_price: z.preprocess(
       (a) => (a === '' || a === undefined || a === null ? null : parseFloat(z.string().parse(a))),
       z.number().positive("Original price must be a positive number").optional().nullable()
     ),
@@ -36,8 +36,8 @@ const productSchema = z.object({
       z.number().int().min(0, "Stock can't be negative")
     ),
     category: z.string().min(1, "Category is required"),
-    isNewArrival: z.boolean().default(false),
-    isFlashDeal: z.boolean().default(false),
+    is_new_arrival: z.boolean().default(false),
+    is_flash_deal: z.boolean().default(false),
     image: z.instanceof(File).refine(file => file.size > 0, "Product image is required"),
 });
 
@@ -49,23 +49,33 @@ export default function AddProductPage() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
 
     const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema),
         defaultValues: {
-            isNewArrival: false,
-            isFlashDeal: false,
-            originalPrice: null,
+            is_new_arrival: false,
+            is_flash_deal: false,
+            original_price: null,
         }
     });
 
     useEffect(() => {
         const fetchCategories = async () => {
-            const { data, error } = await supabase.from('categories').select('*');
-            if (data) setCategories(data);
+            setLoadingCategories(true);
+            try {
+                const { data, error } = await supabase.from('categories').select('*');
+                if (error) throw error;
+                if (data) setCategories(data as Category[]);
+            } catch(e) {
+                console.error("Error fetching categories:", e);
+                toast({ variant: 'destructive', title: "Error", description: "Could not load categories."})
+            } finally {
+                setLoadingCategories(false);
+            }
         };
         fetchCategories();
-    }, []);
+    }, [toast]);
 
     const imageFile = watch('image');
 
@@ -124,15 +134,15 @@ export default function AddProductPage() {
                     title: data.name,
                     description: data.description,
                     price: data.price,
-                    originalPrice: data.originalPrice || null,
+                    original_price: data.original_price,
                     category: data.category,
                     stock: data.stock,
-                    imageUrl: publicUrl,
-                    isNewArrival: data.isNewArrival,
-                    isFlashDeal: data.isFlashDeal,
+                    image_url: publicUrl,
+                    is_new_arrival: data.is_new_arrival,
+                    is_flash_deal: data.is_flash_deal,
                     rating: Math.floor(Math.random() * 2) + 3.5, // Mock rating
-                    reviewCount: Math.floor(Math.random() * 100), // Mock review count,
-                    imageHint: 'product image',
+                    review_count: Math.floor(Math.random() * 100), // Mock review count,
+                    image_hint: 'product image',
                 });
 
             if (insertError) throw insertError;
@@ -228,9 +238,9 @@ export default function AddProductPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                  <div className="space-y-2">
-                                    <Label htmlFor="originalPrice">Original Price (Ksh) (Optional)</Label>
-                                    <Input id="originalPrice" type="number" step="0.01" placeholder="e.g. 5500.00" {...register("originalPrice")} />
-                                    {errors.originalPrice && <p className="text-sm text-destructive">{errors.originalPrice.message}</p>}
+                                    <Label htmlFor="original_price">Original Price (Ksh) (Optional)</Label>
+                                    <Input id="original_price" type="number" step="0.01" placeholder="e.g. 5500.00" {...register("original_price")} />
+                                    {errors.original_price && <p className="text-sm text-destructive">{errors.original_price.message}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="price">Sale Price (Ksh)</Label>
@@ -257,9 +267,9 @@ export default function AddProductPage() {
                                         name="category"
                                         control={control}
                                         render={({ field }) => (
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loadingCategories}>
                                                 <SelectTrigger id="category">
-                                                    <SelectValue placeholder="Select a category" />
+                                                    <SelectValue placeholder={loadingCategories ? "Loading categories..." : "Select a category"} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {categories.map(cat => (
@@ -273,23 +283,23 @@ export default function AddProductPage() {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Controller
-                                        name="isNewArrival"
+                                        name="is_new_arrival"
                                         control={control}
                                         render={({ field }) => (
-                                            <Checkbox id="is-new-arrival" checked={field.value} onCheckedChange={field.onChange} />
+                                            <Checkbox id="is_new_arrival" checked={field.value} onCheckedChange={field.onChange} />
                                         )}
                                     />
-                                    <Label htmlFor="is-new-arrival">Mark as New Arrival</Label>
+                                    <Label htmlFor="is_new_arrival">Mark as New Arrival</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Controller
-                                        name="isFlashDeal"
+                                        name="is_flash_deal"
                                         control={control}
                                         render={({ field }) => (
-                                            <Checkbox id="is-flash-deal" checked={field.value} onCheckedChange={field.onChange} />
+                                            <Checkbox id="is_flash_deal" checked={field.value} onCheckedChange={field.onChange} />
                                         )}
                                     />
-                                    <Label htmlFor="is-flash-deal">Include in Flash Deals</Label>
+                                    <Label htmlFor="is_flash_deal">Include in Flash Deals</Label>
                                 </div>
                             </CardContent>
                         </Card>
