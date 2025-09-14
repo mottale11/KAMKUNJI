@@ -32,7 +32,7 @@ export function ProductCard({ product }: ProductCardProps) {
     });
   };
 
-  const categoryNameToDisplay = product.categories?.name || 'Uncategorized';
+  const categoryNameToDisplay = product.categories?.name || "Uncategorized";
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">

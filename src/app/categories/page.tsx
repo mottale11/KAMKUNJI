@@ -1,6 +1,4 @@
 
-'use client';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Header } from '@/components/layout/header';
@@ -8,31 +6,27 @@ import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Card } from '@/components/ui/card';
 import { supabase } from "@/lib/supabase";
-import { Category } from '@/lib/types';
+import type { Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+async function getCategories() {
+    try {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*');
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('categories')
-                .select('*');
+        if (error) throw error;
+        return (data as Category[]) || [];
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+    }
+}
 
-            if (error) throw error;
-            setCategories(data as Category[]);
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    fetchCategories();
-  }, []);
+export default async function CategoriesPage() {
+  const categories = await getCategories();
+  const loading = categories.length === 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

@@ -114,13 +114,13 @@ export function ProductPageClient({ product, category, relatedProducts }: Produc
                     <div className="space-y-6">
                         <div>
                             <h1 className="text-3xl lg:text-4xl font-bold font-headline">{product.title}</h1>
-                            <p className="text-muted-foreground mt-2">{category?.name || 'Uncategorized'}</p>
+                            <p className="text-muted-foreground mt-2">{product.categories?.name || category?.name || 'Uncategorized'}</p>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                                 <StarRating rating={product.rating || 0} size={20} />
-                                <span className="text-sm text-muted-foreground">({product.review_count} reviews)</span>
+                                <span className="text-sm text-muted-foreground">({product.review_count || 0} reviews)</span>
                             </div>
                             <Separator orientation="vertical" className="h-4" />
                             {product.stock && product.stock > 0 ? (
