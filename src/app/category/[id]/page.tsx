@@ -27,11 +27,15 @@ async function getCategoryData(id: string) {
             productsPromise
         ]);
 
-        if (categoryError) throw categoryError;
-        if (productsError) throw productsError;
+        if (categoryError) {
+          console.error("Category fetch error:", categoryError);
+        };
+        if (productsError) {
+          console.error("Products fetch error:", productsError);
+        };
         
         return {
-            category: categoryData as Category | null,
+            category: (categoryData as Category) || null,
             products: (productsData as Product[]) || []
         }
 
@@ -84,3 +88,4 @@ export default async function CategoryPage({ params }: { params: { id: string } 
     </div>
   );
 }
+

@@ -1,7 +1,7 @@
 
 import { notFound } from 'next/navigation';
 import { supabase } from "@/lib/supabase";
-import type { Product, Category } from '@/lib/types';
+import type { Product } from '@/lib/types';
 import { ProductPageClient } from '@/components/product-page-client';
 
 async function getProductData(id: string) {
@@ -12,7 +12,8 @@ async function getProductData(id: string) {
         .single();
 
     if (error || !product) {
-        return { product: null, category: null, relatedProducts: [] };
+        console.error("Error fetching product:", id, error);
+        return { product: null, relatedProducts: [] };
     }
 
     const { data: relatedProductsData } = await supabase
@@ -22,19 +23,15 @@ async function getProductData(id: string) {
         .neq('id', product.id)
         .limit(4);
     
-    // The category is already included in the product fetch
-    const category = product.categories as Category | null;
-
     return { 
-        product: product as Product, 
-        category: category, 
+        product: product as Product,
         relatedProducts: (relatedProductsData || []) as Product[]
     };
 }
 
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
-    const { product, category, relatedProducts } = await getProductData(params.id);
+    const { product, relatedProducts } = await getProductData(params.id);
 
     if (!product) {
         notFound();
@@ -43,8 +40,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
     return (
         <ProductPageClient 
             product={product} 
-            category={category} 
             relatedProducts={relatedProducts} 
         />
     );
 }
+

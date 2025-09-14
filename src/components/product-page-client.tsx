@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Minus, Plus, ShoppingCart, CheckCircle, Loader2 } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
-import type { Product, Category } from '@/lib/types';
+import type { Product } from '@/lib/types';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
 
@@ -38,11 +38,10 @@ const WhatsAppButton = ({ productUrl, productName }: { productUrl: string, produ
 
 interface ProductPageClientProps {
     product: Product;
-    category: Category | null;
     relatedProducts: Product[];
 }
 
-export function ProductPageClient({ product, category, relatedProducts }: ProductPageClientProps) {
+export function ProductPageClient({ product, relatedProducts }: ProductPageClientProps) {
     const { addToCart } = useCart();
     const { toast } = useToast();
     const [productUrl, setProductUrl] = useState('');
@@ -77,9 +76,9 @@ export function ProductPageClient({ product, category, relatedProducts }: Produc
                             </BreadcrumbItem>
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
-                                {category ? (
+                                {product.categories ? (
                                     <BreadcrumbLink asChild>
-                                        <Link href={`/category/${category.id}`}>{category.name}</Link>
+                                        <Link href={`/category/${product.category_id}`}>{product.categories.name}</Link>
                                     </BreadcrumbLink>
                                 ) : (
                                     <span>Category</span>
@@ -114,7 +113,7 @@ export function ProductPageClient({ product, category, relatedProducts }: Produc
                     <div className="space-y-6">
                         <div>
                             <h1 className="text-3xl lg:text-4xl font-bold font-headline">{product.title}</h1>
-                            <p className="text-muted-foreground mt-2">{product.categories?.name || category?.name || 'Uncategorized'}</p>
+                            <p className="text-muted-foreground mt-2">{product.categories?.name || 'Uncategorized'}</p>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -183,3 +182,4 @@ export function ProductPageClient({ product, category, relatedProducts }: Produc
         </div>
     );
 }
+
