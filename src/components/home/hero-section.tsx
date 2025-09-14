@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function HeroSection() {
-    const heroImageUrl = "https://picsum.photos/seed/hero/1920/1080";
+    const heroImageUrl = "https://i.pinimg.com/736x/6f/47/f4/6f47f4efb92b943b906052c95b26c413.jpg";
 
     return (
         <section className="relative h-[60vh] md:h-[70vh] w-full text-white">
