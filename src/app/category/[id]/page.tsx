@@ -88,4 +88,3 @@ export default async function CategoryPage({ params }: { params: { id: string } 
     </div>
   );
 }
-
