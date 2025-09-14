@@ -1,13 +1,7 @@
 
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { HeroSection } from '@/components/home/hero-section';
-import { FeaturedCategories } from '@/components/home/featured-categories';
-import { FlashDeals } from '@/components/home/flash-deals';
-import { NewArrivals } from '@/components/home/new-arrivals';
-import { Newsletter } from '@/components/home/newsletter';
 import { supabase } from '@/lib/supabase';
 import type { Product, Category } from '@/lib/types';
+import { HomePageClient } from './home-page-client';
 
 async function getHomePageData() {
   try {
@@ -27,17 +21,16 @@ async function getHomePageData() {
 
     const safeCategories = categories || [];
 
-    const processProducts = (products: any[] | null) => {
+    const processProducts = (products: any[] | null): Product[] => {
         return (products || []).map(p => ({
             ...p,
-            categoryName: (p.categories as Category)?.name || "Uncategorized",
         }));
     };
 
     return {
       categories: safeCategories as Category[],
-      flashDeals: processProducts(flashDealsData) as Product[],
-      newArrivals: processProducts(newArrivalsData) as Product[],
+      flashDeals: processProducts(flashDealsData),
+      newArrivals: processProducts(newArrivalsData),
     };
 
   } catch (error) {
@@ -55,16 +48,10 @@ export default async function Home() {
   const { categories, flashDeals, newArrivals } = await getHomePageData();
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Header />
-      <main className="flex-1">
-        <HeroSection />
-        <FeaturedCategories categories={categories} />
-        <FlashDeals products={flashDeals} />
-        <NewArrivals products={newArrivals} />
-        <Newsletter />
-      </main>
-      <Footer />
-    </div>
+    <HomePageClient 
+        categories={categories} 
+        flashDeals={flashDeals} 
+        newArrivals={newArrivals} 
+    />
   );
 }

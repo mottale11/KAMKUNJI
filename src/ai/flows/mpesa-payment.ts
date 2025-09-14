@@ -13,14 +13,18 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const MpesaPaymentInputSchema = z.object({
-  phone: z.string().describe('The phone number to send the STK push to, in the format 07XXXXXXXX.'),
+  phone_number: z.string().describe('Customer\'s phone number in (e.g., 0712345678 , 0112345678, 254712345678)'),
   amount: z.number().describe('The amount to be paid.'),
+  external_reference: z.string().optional().describe('Your reference ID for tracking this payment'),
+  callback_url: z.string().optional().describe('URL to receive payment confirmation updates via callback webhook'),
 });
 export type MpesaPaymentInput = z.infer<typeof MpesaPaymentInputSchema>;
 
 const MpesaPaymentOutputSchema = z.object({
   success: z.boolean(),
+  status: z.string().optional(),
   message: z.string(),
+  customerMessage: z.string().optional(),
   data: z.any().optional(),
 });
 export type MpesaPaymentOutput = z.infer<typeof MpesaPaymentOutputSchema>;
@@ -39,48 +43,38 @@ const mpesaPaymentFlow = ai.defineFlow(
   },
   async (input) => {
     const apiKey = process.env.MPESA_API_KEY;
-    if (!apiKey || apiKey === "your_mpesa_api_key_here") {
+    if (!apiKey) {
       console.error("M-Pesa API key is not configured.");
       return {
         success: false,
         message: 'Server configuration error: M-Pesa API key is missing.',
+        customerMessage: 'Payment service is not configured. Please contact support.',
       };
     }
 
     try {
-      const response = await fetch('https://lipia-api.kreativelabske.com/api/request/stk', {
+      const response = await fetch('https://lipia-api.kreativelabske.com/api/v2/payments/stk-push', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          phone: input.phone,
-          amount: String(input.amount),
-        }),
+        body: JSON.stringify(input),
       });
 
       const result = await response.json();
+      
+      return result;
 
-      if (response.ok && result.message === "callback received successfully") {
-        return {
-          success: true,
-          message: 'Payment request sent successfully. Please check your phone to complete the payment.',
-          data: result.data,
-        };
-      } else {
-        return {
-          success: false,
-          message: result.message || 'An unknown error occurred during payment.',
-          data: result,
-        };
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error('M-Pesa API request failed:', error);
       return {
         success: false,
         message: 'Failed to connect to payment service. Please try again later.',
+        customerMessage: 'Could not connect to the payment gateway.',
       };
     }
   }
 );
+
+    

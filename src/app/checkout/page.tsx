@@ -15,11 +15,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { initiateMpesaPayment } from '@/ai/flows/mpesa-payment';
+import { checkMpesaPaymentStatus } from '@/ai/flows/mpesa-status';
 import { useCart } from '@/context/cart-context';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-
 
 const shippingOptions = {
     'nairobi-cbd': 70,
@@ -43,6 +43,7 @@ export default function CheckoutPage() {
     const [city, setCity] = useState('');
     const [county, setCounty] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [processingMessage, setProcessingMessage] = useState('Pay with M-Pesa');
     const { toast } = useToast();
     const { cart, clearCart } = useCart();
     const { user } = useAuth();
@@ -53,17 +54,91 @@ export default function CheckoutPage() {
         setName(user.user_metadata.full_name || '');
     }, [user])
 
-
     const subtotal = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     const shippingFee = subtotal > 8000 ? 0 : shippingOptions[shippingOption as keyof typeof shippingOptions];
     const total = subtotal + shippingFee;
+
+    const createOrder = async () => {
+        if (!user) return;
+        try {
+            const orderData = {
+                customer: { name: user.user_metadata.full_name || name, email: user.email },
+                status: 'Pending',
+                total: total,
+                items: cart.map(item => ({
+                    productId: item.product.id,
+                    quantity: item.quantity,
+                    price: item.product.price,
+                    title: item.product.title,
+                })),
+                delivery_info: { name, phone, address, city, county },
+            };
+
+            const { error } = await supabase.from('orders').insert(orderData);
+            if (error) throw error;
+
+            toast({
+                title: 'Order Placed!',
+                description: 'Your order has been successfully placed.',
+            });
+
+            clearCart();
+            router.push('/account/orders');
+        } catch (e: any) {
+            toast({
+                variant: 'destructive',
+                title: 'Order Creation Failed',
+                description: e.message || 'We could not save your order. Please contact support.',
+            });
+            setIsProcessing(false);
+        }
+    };
+    
+    const pollPaymentStatus = (transactionReference: string) => {
+        const interval = setInterval(async () => {
+            try {
+                const statusResult = await checkMpesaPaymentStatus({ reference: transactionReference });
+                
+                if (statusResult.success) {
+                    const paymentData = statusResult.data?.response;
+                    if (paymentData?.Status === 'SUCCESS') {
+                        clearInterval(interval);
+                        setProcessingMessage('Payment successful! Creating order...');
+                        await createOrder();
+                    } else if (paymentData?.Status === 'FAILED') {
+                        clearInterval(interval);
+                        toast({ variant: 'destructive', title: 'Payment Failed', description: paymentData.ResultDesc || 'Your payment could not be completed.' });
+                        setIsProcessing(false);
+                    }
+                    // If PENDING, do nothing and let the polling continue
+                } else {
+                     // Minor error in status check, maybe network. Let it poll again.
+                     console.error("Status check minor error:", statusResult.message);
+                }
+            } catch (error) {
+                clearInterval(interval);
+                console.error('Error polling payment status:', error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not verify payment status. Please contact support.' });
+                setIsProcessing(false);
+            }
+        }, 5000); // Poll every 5 seconds
+
+        // Stop polling after 2 minutes
+        setTimeout(() => {
+            clearInterval(interval);
+            if (isProcessing) {
+                toast({ variant: 'destructive', title: 'Payment Timeout', description: "We couldn't confirm your payment in time. Please try again or contact support." });
+                setIsProcessing(false);
+            }
+        }, 120000);
+    };
 
     const handlePayment = async () => {
         if (!user) {
             toast({ variant: 'destructive', title: 'Not Logged In', description: 'Please log in to place an order.' });
             return;
         }
-        if (!phone || !/^(07|01)\d{8}$/.test(phone) || !name || !address || !city || !county) {
+        if (!phone || !/^(07|01|2547|2541)\d{8}$/.test(phone) || !name || !address || !city || !county) {
             toast({
                 variant: 'destructive',
                 title: 'Missing Information',
@@ -73,82 +148,35 @@ export default function CheckoutPage() {
         }
 
         setIsProcessing(true);
+        setProcessingMessage('Sending payment request...');
         toast({
             title: 'Processing Payment...',
-            description: 'Sending payment request to your phone.',
+            description: 'Sending payment request to your phone. Please enter your PIN.',
         });
 
         try {
-            // In a real app, you'd wait for a callback from your payment provider.
-            // Here, we'll simulate a successful payment and create the order.
-            const result = await initiateMpesaPayment({ phone, amount: 1 }); // Use 1 KES for testing
-            if (result.success) {
+            const result = await initiateMpesaPayment({ phone_number: phone, amount: 1 }); // Use 1 KES for testing
+
+            if (result.success && result.data?.TransactionReference) {
                 toast({
-                    title: 'Payment Request Sent',
-                    description: 'Please check your phone to complete the payment. Order will be created upon confirmation.',
+                    title: 'Request Sent',
+                    description: 'Please check your phone to complete the payment.',
                 });
-
-                // Simulate waiting for payment confirmation
-                setTimeout(async () => {
-                    try {
-                        const orderData = {
-                            customer: {
-                                name: user.user_metadata.full_name || name,
-                                email: user.email,
-                            },
-                            status: 'Pending',
-                            total: total,
-                            items: cart.map(item => ({
-                                productId: item.product.id,
-                                quantity: item.quantity,
-                                price: item.product.price, // store price at time of purchase
-                                title: item.product.title,
-                            })),
-                            delivery_info: {
-                                name,
-                                phone,
-                                address,
-                                city,
-                                county,
-                            },
-                        };
-
-                        const { error } = await supabase.from('orders').insert(orderData);
-
-                        if (error) throw error;
-                        
-                        toast({
-                            title: 'Order Placed!',
-                            description: 'Your order has been successfully placed.',
-                        });
-
-                        clearCart();
-                        router.push('/account/orders');
-
-                    } catch(e: any) {
-                         toast({
-                            variant: 'destructive',
-                            title: 'Order Creation Failed',
-                            description: e.message || 'We could not save your order. Please contact support.',
-                        });
-                    } finally {
-                        setIsProcessing(false);
-                    }
-                }, 8000); // Simulate 8 second wait for M-Pesa pin
-
+                setProcessingMessage('Confirming payment...');
+                pollPaymentStatus(result.data.TransactionReference);
             } else {
                 toast({
                     variant: 'destructive',
                     title: 'Payment Failed',
-                    description: result.message || 'An unknown error occurred.',
+                    description: result.customerMessage || 'Could not initiate payment.',
                 });
                 setIsProcessing(false);
             }
-        } catch (error) {
+        } catch (error: any) {
              toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Could not connect to the payment service. Please try again.',
+                description: error.message || 'Could not connect to the payment service. Please try again.',
             });
             setIsProcessing(false);
         }
@@ -265,7 +293,7 @@ export default function CheckoutPage() {
                                 {isProcessing ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Processing...
+                                        {processingMessage}...
                                     </>
                                 ) : (
                                     <>
@@ -292,3 +320,5 @@ export default function CheckoutPage() {
         </div>
     );
 }
+
+    
