@@ -4,10 +4,10 @@ import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { ProductCard } from '@/components/product-card';
 import { supabase } from "@/lib/supabase";
 import type { Product, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CategoryClient } from './category-client';
 
 async function getCategoryData(id: string) {
     try {
@@ -77,15 +77,7 @@ export default async function CategoryPage({ params }: { params: { id: string } 
         <div className="container pb-16 lg:pb-24">
           <h1 className="text-3xl font-bold font-headline mb-8">{category?.name}</h1>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.length > 0 ? (
-                products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                ))
-            ) : (
-                <p className="col-span-full text-center text-muted-foreground">No products found in this category.</p>
-            )}
-          </div>
+          <CategoryClient products={products} />
         </div>
       </main>
       <Footer />

@@ -1,18 +1,16 @@
-'use client';
-import { useState, useEffect } from 'react';
+
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { ProductCard } from '@/components/product-card';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import { NewArrivalsClient } from './new-arrivals-client';
 
 async function fetchNewArrivals() {
   const { data, error } = await supabase
       .from('products')
-      .select('*')
+      .select('*, categories(name)')
       .eq('is_new_arrival', true)
       .order('created_at', { ascending: false })
       .limit(12);
@@ -24,20 +22,8 @@ async function fetchNewArrivals() {
   return data as Product[];
 }
 
-export default function NewArrivalsPage() {
-  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getNewArrivals = async () => {
-      setLoading(true);
-      const fetchedArrivals = await fetchNewArrivals();
-      setNewArrivals(fetchedArrivals);
-      setLoading(false);
-    };
-
-    getNewArrivals();
-  }, []);
+export default async function NewArrivalsPage() {
+  const newArrivals = await fetchNewArrivals();
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -61,23 +47,7 @@ export default function NewArrivalsPage() {
 
         <div className="container pb-16 lg:pb-24">
           <h1 className="text-3xl font-bold font-headline mb-8">New Arrivals</h1>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-             {loading ? (
-              Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="space-y-2">
-                    <Skeleton className="h-[250px] w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-4 w-1/2" />
-                </div>
-              ))
-            ) : newArrivals.length > 0 ? (
-              newArrivals.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            ) : (
-              <p className="col-span-full text-center text-muted-foreground">There are no new arrivals at the moment. Please check back later!</p>
-            )}
-          </div>
+          <NewArrivalsClient newArrivals={newArrivals} />
         </div>
       </main>
       <Footer />
