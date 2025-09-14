@@ -12,12 +12,14 @@ import type { Category, Product } from '@/lib/types';
 async function getHomePageData() {
   try {
     const categoriesPromise = supabase.from('categories').select('*').limit(6);
+    
     const flashDealsPromise = supabase
       .from('products')
       .select('*, categories(name)')
       .eq('is_flash_deal', true)
       .order('created_at', { ascending: false })
       .limit(8);
+      
     const newArrivalsPromise = supabase
       .from('products')
       .select('*, categories(name)')
@@ -25,11 +27,19 @@ async function getHomePageData() {
       .order('created_at', { ascending: false })
       .limit(8);
 
-    const [{ data: categories }, { data: flashDeals }, { data: newArrivals }] = await Promise.all([
+    const [
+      { data: categories, error: catError }, 
+      { data: flashDeals, error: fdError }, 
+      { data: newArrivals, error: naError }
+    ] = await Promise.all([
       categoriesPromise,
       flashDealsPromise,
       newArrivalsPromise
     ]);
+
+    if (catError) throw catError;
+    if (fdError) throw fdError;
+    if (naError) throw naError;
 
     return {
       categories: (categories || []) as Category[],

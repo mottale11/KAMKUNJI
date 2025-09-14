@@ -1,3 +1,6 @@
+
+'use client';
+
 import { ProductCard } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
